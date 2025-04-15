@@ -2,19 +2,24 @@
     to manage the game board, check for wins, and determine if the board is full.'''  
 
 
-def print_board():
+def board_list(size, tiles):
+    """Creates a list of Tic Tac Toe board of the specified size. """
+    board = []
+    for i in range(size):
+        # Create a row with the specified size, filled with empty tiles
+        board.append([tiles] * size)
+    return board
+
+
+def print_board(size, tiles):
     """
     Prints the board with column labels (a, b, c, ...) and row numbers (1, 2, 3, ...).
 
     Args:
         board (list): The 2D list representing the board.
     """
-    size = 3
 
-    board = []
-    for i in range(size):
-        # Create a row with the specified size, filled with empty tiles
-        board.append(['⬜'] * size)
+    board = board_list(size, tiles)
 
     # Print the column letters at the top
     column_letters = "    " + "  ".join(chr(97 + col) for col in range(size))
@@ -70,7 +75,7 @@ def is_board_full(board):
     """
     for row in board:
         for cell in row:
-            if cell == " ":
+            if cell == "⬜":
                 return False
     return True
 
@@ -82,7 +87,7 @@ def game(player1, player2):
     the game loop, including win/draw detection and prompting for a replay.
     """
     # Initialize an empty game board
-    board = [[" " for _ in range(3)] for _ in range(3)]
+    board = board_list(3, "⬜")
     current_player = player1
     game_over = False
     
@@ -91,7 +96,7 @@ def game(player1, player2):
     print("To place your mark, enter the row (0-2) and column (0-2).")
     
     while not game_over:
-        print_board()
+        print_board(3, "⬜")
         print(f"Player {current_player} 's turn.")
         
         # Get a valid move from the player
@@ -101,7 +106,7 @@ def game(player1, player2):
                 row = int(input("Enter row (0-2): "))
                 col = int(input("Enter column (0-2): "))
                 
-                if 0 <= row <= 2 and 0 <= col <= 2 and board[row][col] == " ":
+                if 0 <= row <= 2 and 0 <= col <= 2 and board[row][col] == "⬜":
                     valid_move = True
                 else:
                     print("Invalid move! Please try again.")
@@ -113,12 +118,12 @@ def game(player1, player2):
         
         # Check for a win
         if check_win(board, current_player):
-            print_board()
+            print_board(3, "⬜")
             print(f"Player {current_player} wins!")
             game_over = True
         # Check for a draw
         elif is_board_full(board):
-            print_board()
+            print_board(3, "⬜")
             print("It's a draw!")
             game_over = True
         # Switch players

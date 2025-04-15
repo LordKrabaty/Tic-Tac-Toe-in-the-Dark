@@ -1,9 +1,9 @@
 from src import deftoe
 
-# basic variables
-# player1 and player2 are the symbols used in the game
-player1 = '✖️'
-player2 = '⭕'
+# game variables
+
+player1 = '✖️' # Player 1 symbol
+player2 = '⭕' # Player 2 symbol
 
 # game loop
 deftoe.game(player1, player2)
