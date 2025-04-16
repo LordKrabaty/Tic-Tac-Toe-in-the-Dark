@@ -2,10 +2,10 @@ from src import deftoe
 
 # game variables
 
-player1 = '✖️' # Player 1 symbol
+player1 = '✖️ ' # Player 1 symbol
 player2 = '⭕' # Player 2 symbol
 empty_tile = '⬜' # Empty tile symbol
-boad_size = 3 # board size, 3 means 3x3 etec
+boad_size = 3 # board size, 3 means 3x3 etc.
 
 # instuctions
 deftoe.instructions(player1, player2) 

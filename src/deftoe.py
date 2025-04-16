@@ -14,9 +14,9 @@ def instructions(player1: str, player2: str) -> None:
         player2 (str): Symbol for player 2.
     """
     print("Welcome to Tic Tac Toe!")
-    print(f"Players take turns placing {player1}  and {player2}.")
+    print(f"Players take turns placing {player1} and {player2}.")
     print("To place your mark, enter the row (0-2) and column (0-2).")
-    print(f"Player 1 is {player1}  and Player 2 is {player2}.")
+    print(f"Player 1 is {player1} and Player 2 is {player2}.")
     print("The first player to get three in a row wins!")
     print("If the board is full and no player has three in a row, it's a draw.")
     print("Let's start the game!")
@@ -69,22 +69,48 @@ def check_win(board: List[List[str]], player: str) -> bool:
     Returns:
         bool: True if the player has won, False otherwise.
     """
-    # Check rows for a win
+    # Check each row for a win
     for row in board:
-        if all(cell == player for cell in row):
-            return True
-    
-    # Check columns for a win
-    for col in range(len(board)):
-        if all(board[row][col] == player for row in range(len(board))):
-            return True
-    
-    # Check diagonals for a win
-    if all(board[i][i] == player for i in range(len(board))) or \
-       all(board[i][len(board) - 1 - i] == player for i in range(len(board))):
-        return True
-    
+        row_win = True  # Assume player wins in this row
+        for cell in row:
+            if cell != player:
+                row_win = False  # If any cell is not the player's symbol, no win
+                break
+        if row_win:
+            return True  # Return True if a winning row is found
+
+    # Check each column for a win
+    board_size = len(board)  # Get the size of the board
+    for col in range(board_size):
+        col_win = True  # Assume player wins in this column
+        for row in range(board_size):
+            if board[row][col] != player:
+                col_win = False  # If any cell is not the player's symbol, no win
+                break
+        if col_win:
+            return True  # Return True if a winning column is found
+
+    # Check the first diagonal (top-left to bottom-right) for a win
+    diagonal_win_1 = True  # Assume player wins on this diagonal
+    for i in range(board_size):
+        if board[i][i] != player:
+            diagonal_win_1 = False  # If any cell is not the player's symbol, no win
+            break
+    if diagonal_win_1:
+        return True  # Return True if the first diagonal is a win
+
+    # Check the second diagonal (top-right to bottom-left) for a win
+    diagonal_win_2 = True  # Assume player wins on this diagonal
+    for i in range(board_size):
+        if board[i][board_size - 1 - i] != player:
+            diagonal_win_2 = False  # If any cell is not the player's symbol, no win
+            break
+    if diagonal_win_2:
+        return True  # Return True if the second diagonal is a win
+
+    # If no win condition is met, return False
     return False
+
 
 def is_board_full(board: List[List[str]], empty_tile: str) -> bool:
     """
@@ -101,6 +127,37 @@ def is_board_full(board: List[List[str]], empty_tile: str) -> bool:
         if empty_tile in row:
             return False
     return True
+
+def get_valid_move(board: List[List[str]], board_size: int, empty_tile: str) -> tuple:
+    """
+    Prompts the user to enter a valid move using row numbers (1, 2, 3) and column letters (A, B, C).
+    
+    Args:
+        board (list): A 2D list representing the Tic Tac Toe board.
+        board_size (int): The size of the board (number of rows and columns).
+        empty_tile (str): The symbol representing an empty tile.
+    
+    Returns:
+        tuple: A tuple containing the valid row and column indices (0-based).
+    """
+    valid_move = False
+    while not valid_move:
+        try:
+            # Prompt user for row (1-based index)
+            row = int(input(f"Enter row (1-{board_size}): ")) - 1
+            
+            # Prompt user for column (letter A, B, C)
+            col_letter = input(f"Enter column (A-{chr(65 + board_size - 1)}): ").upper()
+            col = ord(col_letter) - 65
+            
+            # Validate move
+            if 0 <= row < board_size and 0 <= col < board_size and board[row][col] == empty_tile:
+                valid_move = True
+                return row, col
+            else:
+                print("Invalid move! Please try again.")
+        except ValueError:
+            print("Invalid input! Please enter a valid row number and column letter.")
 
 def game(player1: str, player2: str, board_size: int, empty_tile: str) -> None:
     """
@@ -125,18 +182,7 @@ def game(player1: str, player2: str, board_size: int, empty_tile: str) -> None:
         print(f"Player {current_player}'s turn.")
         
         # Get a valid move from the player
-        valid_move = False
-        while not valid_move:
-            try:
-                row = int(input("Enter row (0-2): "))
-                col = int(input("Enter column (0-2): "))
-                
-                if 0 <= row < board_size and 0 <= col < board_size and board[row][col] == empty_tile:
-                    valid_move = True
-                else:
-                    print("Invalid move! Please try again.")
-            except ValueError:
-                print("Please enter numbers between 0 and 2.")
+        row, col = get_valid_move(board, board_size, empty_tile)
         
         # Perform the move
         board[row][col] = current_player
@@ -154,3 +200,4 @@ def game(player1: str, player2: str, board_size: int, empty_tile: str) -> None:
         # Switch players
         else:
             current_player = player1 if current_player == player2 else player2
+
