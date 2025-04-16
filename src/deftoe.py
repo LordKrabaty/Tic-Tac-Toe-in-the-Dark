@@ -1,17 +1,25 @@
 '''Function module for Tic Tac Toe game.This module contains functions 
     to manage the game board, check for wins, and determine if the board is full.'''  
 
+def instructions(player1, player2):
+    print("Welcome to Tic Tac Toe!")
+    print(f"Players take turns placing {player1}  and {player2}.")
+    print("To place your mark, enter the row (0-2) and column (0-2).")
+    print(f"Player 1 is {player1}  and Player 2 is {player2}.")
+    print("The first player to get three in a row wins!")
+    print("If the board is full and no player has three in a row, it's a draw.")
+    print("Let's start the game!")
 
-def board_list(size, tiles):
+def board_list(board_size, board_tiles):
     """Creates a list of Tic Tac Toe board of the specified size. """
     board = []
-    for i in range(size):
+    for i in range(board_size):
         # Create a row with the specified size, filled with empty tiles
-        board.append([tiles] * size)
+        board.append([board_tiles] * board_size)
     return board
 
 
-def print_board(size, tiles):
+def print_board(board_size, board_tiles):
     """
     Prints the board with column labels (a, b, c, ...) and row numbers (1, 2, 3, ...).
 
@@ -19,10 +27,10 @@ def print_board(size, tiles):
         board (list): The 2D list representing the board.
     """
 
-    board = board_list(size, tiles)
+    board = board_list(board_size, board_tiles)
 
     # Print the column letters at the top
-    column_letters = "    " + "  ".join(chr(97 + col) for col in range(size))
+    column_letters = "    " + "  ".join(chr(97 + col) for col in range(board_size))
     print(column_letters.upper())
 
     # Print each row with its corresponding number label
@@ -63,7 +71,7 @@ def check_win(board, player):
     return False
 
 
-def is_board_full(board):
+def is_board_full(board, board_tiles):
     """
     Checks if the game board is completely filled.
     
@@ -75,11 +83,11 @@ def is_board_full(board):
     """
     for row in board:
         for cell in row:
-            if cell == "⬜":
+            if cell == board_tiles:
                 return False
     return True
 
-def game(player1, player2):
+def game(player1, player2, board_size, board_tiles):
     """
     Main function to run the Tic Tac Toe game.
     
@@ -87,16 +95,12 @@ def game(player1, player2):
     the game loop, including win/draw detection and prompting for a replay.
     """
     # Initialize an empty game board
-    board = board_list(3, "⬜")
+    board = board_list(board_size, board_tiles)
     current_player = player1
     game_over = False
     
-    print("Welcome to Tic Tac Toe!")
-    print("Players take turns placing x and O.")
-    print("To place your mark, enter the row (0-2) and column (0-2).")
-    
     while not game_over:
-        print_board(3, "⬜")
+        print_board(board_size, board_tiles)
         print(f"Player {current_player} 's turn.")
         
         # Get a valid move from the player
@@ -106,7 +110,7 @@ def game(player1, player2):
                 row = int(input("Enter row (0-2): "))
                 col = int(input("Enter column (0-2): "))
                 
-                if 0 <= row <= 2 and 0 <= col <= 2 and board[row][col] == "⬜":
+                if 0 <= row <= 2 and 0 <= col <= 2 and board[row][col] == board_tiles:
                     valid_move = True
                 else:
                     print("Invalid move! Please try again.")
@@ -118,12 +122,12 @@ def game(player1, player2):
         
         # Check for a win
         if check_win(board, current_player):
-            print_board(3, "⬜")
+            print_board(board_size, board_tiles)
             print(f"Player {current_player} wins!")
             game_over = True
         # Check for a draw
-        elif is_board_full(board):
-            print_board(3, "⬜")
+        elif is_board_full(board, board_tiles):
+            print_board(board_size, board_tiles)
             print("It's a draw!")
             game_over = True
         # Switch players
