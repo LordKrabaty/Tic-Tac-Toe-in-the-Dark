@@ -173,28 +173,30 @@ def game(player1: str, player2: str, board_size: int, empty_tile: str) -> None:
         empty_tile (str): The symbol representing an empty tile.
     """
     # Initialize an empty game board
-    board = create_board(board_size, empty_tile)
+    from copy import deepcopy
+    board_with_all_moves = create_board(board_size, empty_tile) # board for showing completed moves
+    board_with_hidden_moves = deepcopy(board_with_all_moves) # board for not showing completed moves
     current_player = player1
     game_over = False
     
     while not game_over:
-        print_board(board)
+        print_board(board_with_hidden_moves)  # not showing the moves of the other player
         print(f"Player {current_player}'s turn.")
         
         # Get a valid move from the player
-        row, col = get_valid_move(board, board_size, empty_tile)
+        row, col = get_valid_move(board_with_all_moves, board_size, empty_tile)
         
         # Perform the move
-        board[row][col] = current_player
+        board_with_all_moves[row][col] = current_player
         
         # Check for a win
-        if check_win(board, current_player):
-            print_board(board)
+        if check_win(board_with_all_moves, current_player):
+            print_board(board_with_all_moves)
             print(f"Player {current_player} wins!")
             game_over = True
         # Check for a draw
-        elif is_board_full(board, empty_tile):
-            print_board(board)
+        elif is_board_full(board_with_all_moves, empty_tile):
+            print_board(board_with_all_moves)
             print("It's a draw!")
             game_over = True
         # Switch players
