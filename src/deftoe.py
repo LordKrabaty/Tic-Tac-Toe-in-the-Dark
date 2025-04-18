@@ -156,7 +156,7 @@ def get_valid_move(board: List[List[str]], board_size: int, empty_tile: str) -> 
                 return row, col
             else:
                 print("Invalid move! Please try again.")
-        except ValueError:
+        except Exception:
             print("Invalid input! Please enter a valid row number and column letter.")
 
 
