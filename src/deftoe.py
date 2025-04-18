@@ -159,6 +159,19 @@ def get_valid_move(board: List[List[str]], board_size: int, empty_tile: str) -> 
         except ValueError:
             print("Invalid input! Please enter a valid row number and column letter.")
 
+
+def clear_screen():
+    """
+    Clears the console screen.
+    """
+    import os, platform
+
+    # Check the operating system and run the appropriate command
+    if platform.system() == "Windows":
+        os.system('cls')
+    else:
+        os.system('clear')
+
 def game(player1: str, player2: str, board_size: int, empty_tile: str) -> None:
     """
     Main function to run the Tic Tac Toe game.
@@ -178,8 +191,12 @@ def game(player1: str, player2: str, board_size: int, empty_tile: str) -> None:
     board_with_hidden_moves = deepcopy(board_with_all_moves) # board for not showing completed moves
     current_player = player1
     game_over = False
+
+    input("Press Enter to start the game...")  # Wait for user input to start the game
+    clear_screen()  # Clear the console for a fresh start
     
     while not game_over:
+        clear_screen() # Clear the console for not showing the moves of the other player
         print_board(board_with_hidden_moves)  # not showing the moves of the other player
         print(f"Player {current_player}'s turn.")
         
