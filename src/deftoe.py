@@ -15,7 +15,7 @@ def instructions(player1: str, player2: str) -> None:
     """
     print("Welcome to Tic Tac Toe!")
     print(f"Players take turns placing {player1} and {player2}.")
-    print("To place your mark, enter the row (0-2) and column (0-2).")
+    print("To place your mark, enter the column letter and row number (e.g., 'B2', 'A3') within the board range")
     print(f"Player 1 is {player1} and Player 2 is {player2}.")
     print("The first player to get three in a row wins!")
     print("If the board is full and no player has three in a row, it's a draw.")
@@ -117,7 +117,7 @@ def is_board_full(board: List[List[str]], empty_tile: str) -> bool:
     Checks if the game board is completely filled.
     
     Args:
-        board (list): A 2D list representing the Tic Tac Toe board.
+        board (list): A 2D list representing the Tic Tac Toe board.  
         empty_tile (str): The symbol representing an empty tile.
     
     Returns:
@@ -128,9 +128,10 @@ def is_board_full(board: List[List[str]], empty_tile: str) -> bool:
             return False
     return True
 
-def get_valid_move(board: List[List[str]], board_size: int, empty_tile: str) -> tuple:
+def get_valid_move(board: list, board_size: int, empty_tile: str) -> tuple:
     """
-    Prompts the user to enter a valid move using row numbers (1, 2, 3) and column letters (A, B, C).
+    Prompts the user to enter a valid move using a single input combining
+    column letter and row number (e.g., 'B2', 'A10'), with dynamic range display.
     
     Args:
         board (list): A 2D list representing the Tic Tac Toe board.
@@ -143,11 +144,18 @@ def get_valid_move(board: List[List[str]], board_size: int, empty_tile: str) -> 
     valid_move = False
     while not valid_move:
         try:
-            # Prompt user for row (1-based index)
-            row = int(input(f"Enter row (1-{board_size}): ")) - 1
+            # Calculate the range of column letters and row numbers
+            col_max = chr(65 + board_size - 1)
+            row_max = board_size
             
-            # Prompt user for column (letter A, B, C)
-            col_letter = input(f"Enter column (A-{chr(65 + board_size - 1)}): ").upper()
+            # Prompt user for move in the format 'B2', 'A10', etc., with range
+            move = input(f"Enter your move (between A1-{col_max}{row_max}): ").strip().upper()
+            
+            # Extract column letter and row number from input
+            col_letter = move[0]
+            row = int(move[1:]) - 1  # Convert row to 0-based index
+            
+            # Convert column letter to 0-based index
             col = ord(col_letter) - 65
             
             # Validate move
@@ -156,9 +164,8 @@ def get_valid_move(board: List[List[str]], board_size: int, empty_tile: str) -> 
                 return row, col
             else:
                 print("Invalid move! Please try again.")
-        except Exception:
-            print("Invalid input! Please enter a valid row number and column letter.")
-
+        except (IndexError, ValueError):
+            print("Invalid input! Please enter a valid move within the specified range.")
 
 def clear_screen():
     """
