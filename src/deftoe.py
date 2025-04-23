@@ -111,7 +111,6 @@ def check_win(board: List[List[str]], player: str) -> bool:
     # If no win condition is met, return False
     return False
 
-
 def is_board_full(board: List[List[str]], empty_tile: str) -> bool:
     """
     Checks if the game board is completely filled.
@@ -127,6 +126,18 @@ def is_board_full(board: List[List[str]], empty_tile: str) -> bool:
         if empty_tile in row:
             return False
     return True
+
+def clear_screen():
+    """
+    Clears the console screen.
+    """
+    import os, platform
+
+    # Check the operating system and run the appropriate command
+    if platform.system() == "Windows":
+        os.system('cls')
+    else:
+        os.system('clear')
 
 def get_valid_move(board: list, board_size: int, empty_tile: str) -> tuple:
     """
@@ -159,7 +170,7 @@ def get_valid_move(board: list, board_size: int, empty_tile: str) -> tuple:
             col = ord(col_letter) - 65
             
             # Validate move
-            if 0 <= row < board_size and 0 <= col < board_size and board[row][col] == empty_tile:
+            if 0 <= row < board_size and 0 <= col < board_size:
                 valid_move = True
                 return row, col
             else:
@@ -167,19 +178,8 @@ def get_valid_move(board: list, board_size: int, empty_tile: str) -> tuple:
         except (IndexError, ValueError):
             print("Invalid input! Please enter a valid move within the specified range.")
 
-def clear_screen():
-    """
-    Clears the console screen.
-    """
-    import os, platform
 
-    # Check the operating system and run the appropriate command
-    if platform.system() == "Windows":
-        os.system('cls')
-    else:
-        os.system('clear')
-
-def game(player1: str, player2: str, board_size: int, empty_tile: str) -> None:
+def game(player1: str, player2: str, board_size: int, empty_tile: str, blocked_tile: str = '⬛') -> None:
     """
     Main function to run the Tic Tac Toe game.
     
@@ -191,27 +191,40 @@ def game(player1: str, player2: str, board_size: int, empty_tile: str) -> None:
         player2 (str): Symbol for player 2.
         board_size (int): The size of the board (number of rows and columns).
         empty_tile (str): The symbol representing an empty tile.
+        blocked_tile (str): The symbol representing a blocked tile.
     """
     # Initialize an empty game board
     from copy import deepcopy
-    board_with_all_moves = create_board(board_size, empty_tile) # board for showing completed moves
-    board_with_hidden_moves = deepcopy(board_with_all_moves) # board for not showing completed moves
+    board_with_all_moves = create_board(board_size, empty_tile)  # Board for showing all moves
+    board_with_hidden_moves = deepcopy(board_with_all_moves)  # Board for hiding completed moves
     current_player = player1
     game_over = False
 
     input("Press Enter to start the game...")  # Wait for user input to start the game
+    
     clear_screen()  # Clear the console for a fresh start
     
     while not game_over:
-        clear_screen() # Clear the console for not showing the moves of the other player
-        print_board(board_with_hidden_moves)  # not showing the moves of the other player
+        print_board(board_with_hidden_moves)  # Not showing the moves of the other player
         print(f"Player {current_player}'s turn.")
         
         # Get a valid move from the player
         row, col = get_valid_move(board_with_all_moves, board_size, empty_tile)
         
-        # Perform the move
-        board_with_all_moves[row][col] = current_player
+        # Check if the selected tile is not empty
+        if board_with_all_moves[row][col] != empty_tile:
+            # Change the tile back to empty on both boards
+            non_empty_tile = board_with_all_moves[row][col]
+            board_with_all_moves[row][col] = blocked_tile
+            board_with_hidden_moves[row][col] = blocked_tile # tile is blocked now
+            print(f"Hit a non-empty tile ({non_empty_tile})  It is now permanently blocked. Switching turns.")
+            # Switch players immediately
+            current_player = player1 if current_player == player2 else player2
+            continue  # Continue to the next iteration with the other player
+        else:
+            # Perform the move
+            board_with_all_moves[row][col] = current_player
+            clear_screen()  # Clear the console for not showing the moves of the other player
         
         # Check for a win
         if check_win(board_with_all_moves, current_player):
