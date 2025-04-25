@@ -139,19 +139,20 @@ def clear_screen():
     else:
         os.system('clear')
 
-def get_valid_move(board: list, board_size: int, empty_tile: str) -> tuple:
+def get_valid_move(board: list, blocked_tile: str) -> tuple:
     """
     Prompts the user to enter a valid move using a single input combining
     column letter and row number (e.g., 'B2', 'A10'), with dynamic range display.
     
     Args:
         board (list): A 2D list representing the Tic Tac Toe board.
-        board_size (int): The size of the board (number of rows and columns).
-        empty_tile (str): The symbol representing an empty tile.
+        blocked_tile (str): The symbol representing a blocked tile.
     
     Returns:
         tuple: A tuple containing the valid row and column indices (0-based).
     """
+    # Calculate board size from the board list
+    board_size = len(board)
     valid_move = False
     while not valid_move:
         try:
@@ -171,8 +172,12 @@ def get_valid_move(board: list, board_size: int, empty_tile: str) -> tuple:
             
             # Validate move
             if 0 <= row < board_size and 0 <= col < board_size:
-                valid_move = True
-                return row, col
+                # Check if the tile is not blocked
+                if board[row][col] != blocked_tile:
+                    valid_move = True
+                    return row, col
+                else:
+                    print("Tile is blocked! Please try again.")
             else:
                 print("Invalid move! Please try again.")
         except (IndexError, ValueError):
@@ -209,13 +214,13 @@ def game(player1: str, player2: str, board_size: int, empty_tile: str, blocked_t
         print(f"Player {current_player}'s turn.")
         
         # Get a valid move from the player
-        row, col = get_valid_move(board_with_all_moves, board_size, empty_tile)
+        row, col = get_valid_move(board_with_all_moves, blocked_tile)
         
         # Check if the selected tile is not empty
         if board_with_all_moves[row][col] != empty_tile:
             # Change the tile back to empty on both boards
             non_empty_tile = board_with_all_moves[row][col]
-            board_with_all_moves[row][col] = blocked_tile
+            board_with_all_moves[row][col] = blocked_tile   # tile is blocked now
             board_with_hidden_moves[row][col] = blocked_tile # tile is blocked now
             print(f"Hit a non-empty tile ({non_empty_tile})  It is now permanently blocked. Switching turns.")
             # Switch players immediately
