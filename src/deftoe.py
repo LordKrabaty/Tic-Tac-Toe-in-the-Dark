@@ -14,12 +14,17 @@ def instructions(player1: str, player2: str) -> None:
         player2 (str): Symbol for player 2.
     """
     print("Welcome to Tic Tac Toe!")
+    print("This version of Tic Tac Toe includes a unique twist: the board is hidden during play.")
+    print("Players will not see the opponent's moves until they hit a non-empty tile.")
+    print("If you hit a non-empty tile, it becomes permanently blocked, and the turn switches to the other player.")
+    print("After hitting a non-empty tile, all previous moves are revealed on the board.")
     print(f"Players take turns placing {player1} and {player2}.")
-    print("To place your mark, enter the column letter and row number (e.g., 'B2', 'A3') within the board range")
+    print("To place your mark, enter the column letter and row number (e.g., 'B2', 'A3') within the board range.")
     print(f"Player 1 is {player1} and Player 2 is {player2}.")
     print("The first player to get three in a row wins!")
     print("If the board is full and no player has three in a row, it's a draw.")
     print("Let's start the game!")
+
 
 def create_board(size: int, empty_tile: str) -> List[List[str]]:
     """
@@ -139,14 +144,14 @@ def clear_screen():
     else:
         os.system('clear')
 
-def get_valid_move(board: list, blocked_tile: str) -> tuple:
+def get_valid_move(board: list, empty_tile: str) -> tuple:
     """
     Prompts the user to enter a valid move using a single input combining
     column letter and row number (e.g., 'B2', 'A10'), with dynamic range display.
     
     Args:
         board (list): A 2D list representing the Tic Tac Toe board.
-        blocked_tile (str): The symbol representing a blocked tile.
+        empty_tile (str): The symbol representing a blocked tile.
     
     Returns:
         tuple: A tuple containing the valid row and column indices (0-based).
@@ -173,7 +178,7 @@ def get_valid_move(board: list, blocked_tile: str) -> tuple:
             # Validate move
             if 0 <= row < board_size and 0 <= col < board_size:
                 # Check if the tile is not blocked
-                if board[row][col] != blocked_tile:
+                if board[row][col] == empty_tile:
                     valid_move = True
                     return row, col
                 else:
@@ -214,15 +219,15 @@ def game(player1: str, player2: str, board_size: int, empty_tile: str, blocked_t
         print(f"Player {current_player}'s turn.")
         
         # Get a valid move from the player
-        row, col = get_valid_move(board_with_all_moves, blocked_tile)
+        row, col = get_valid_move(board_with_hidden_moves, empty_tile)
         
         # Check if the selected tile is not empty
         if board_with_all_moves[row][col] != empty_tile:
             # Change the tile back to empty on both boards
             non_empty_tile = board_with_all_moves[row][col]
             board_with_all_moves[row][col] = blocked_tile   # tile is blocked now
-            board_with_hidden_moves[row][col] = blocked_tile # tile is blocked now
-            print(f"Hit a non-empty tile ({non_empty_tile})  It is now permanently blocked. Switching turns.")
+            board_with_hidden_moves = deepcopy(board_with_all_moves) # Users can see previous moves
+            print(f"Hit a non-empty tile ({non_empty_tile})  It is now permanently blocked. Previous moves can be seen on board. Switching turns.")
             # Switch players immediately
             current_player = player1 if current_player == player2 else player2
             continue  # Continue to the next iteration with the other player
