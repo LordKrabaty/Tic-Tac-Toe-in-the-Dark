@@ -252,6 +252,7 @@ def game(player1: str, player2: str, board_size: int, empty_tile: str, blocked_t
             print_board(board_with_all_moves)
             print(f"Player {current_player} wins!")
             game_over = True
+            return current_player  # Return the winning player
         # Check for a draw
         elif is_board_full(board_with_all_moves, empty_tile):
             # Check if there are blocked tiles on the board
@@ -262,13 +263,14 @@ def game(player1: str, player2: str, board_size: int, empty_tile: str, blocked_t
                     for j in range(board_size):
                         if board_with_all_moves[i][j] == blocked_tile:
                             board_with_all_moves[i][j] = empty_tile
-                board_with_hidden_moves = create_board(board_size, empty_tile) ### Reset the hidden moves board0
+                board_with_hidden_moves = create_board(board_size, empty_tile) ### Reset the hidden moves board
                 current_player = player1 if current_player == player2 else player2
                 continue  # Continue to the next iteration with the other player
             else:
                 print_board(board_with_all_moves)
                 print("It's a draw!")
                 game_over = True
+                return 'draw'  # Return 'draw' if the game is a draw
         # Switch players
         else:
             current_player = player1 if current_player == player2 else player2

@@ -2,21 +2,42 @@ from src import deftoe
 
 # game variables
 
-player1 = '✖️ ' # Player 1 symbol
-player2 = '⭕' # Player 2 symbol
+# Define symbols for players and empty tile
+player1 = '✖️ '  # Player 1 symbol
+player2 = '⭕'   # Player 2 symbol
 empty_tile = '⬜' # Empty tile symbol
-boad_size = 3 # board size, 3 means 3x3 etc.
+board_size = 3   # Board size, 3 means 3x3
 
-# instuctions
-deftoe.instructions(player1, player2) 
+# Initialize win counters
+player1_wins = 0
+player2_wins = 0
+draws = 0
 
-# game loop
-deftoe.game(player1, player2, boad_size, empty_tile)
+# Instructions (assuming this function prints game instructions)    
+deftoe.instructions(player1, player2)
+
+# Main game loop
+while True:
+    # Play the game and get the result
+    result = deftoe.game(player1, player2, board_size, empty_tile)
     
-# Ask to play again
-play_again = input("Do you want to play again? (yes/no): ").lower()
-if play_again == "yes":
-    deftoe.game(player1, player2, empty_tile)
-else:
-    print("Thanks for playing!")
+    # Update counters based on the game result
+    if result == player1:
+        player1_wins += 1
+    elif result == player2:
+        player2_wins += 1
+    elif result == "draw":
+        draws += 1
+    else:
+        print("Unexpected result:", result)
+    
+    # Print the current score
+    print(f"Score - Player 1: {player1_wins}, Player 2: {player2_wins}, Draws: {draws}")
+    
+    # Ask to play again
+    play_again = input("Do you want to play again? (yes/no): ").lower()
+    if play_again != "yes":
+        print("Thanks for playing!")
+        break
+
 
