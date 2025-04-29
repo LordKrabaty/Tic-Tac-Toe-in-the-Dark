@@ -14,7 +14,7 @@ def instructions(player1: str, player2: str) -> None:
         player2 (str): Symbol for player 2.
     """
     print("Welcome to Tic Tac Toe!")
-    print("This version of Tic Tac Toe includes a unique twist: the board is hidden during play.")
+    print("This version of Tic Tac Toe includes a unique twist: the board is (partly) hidden during play.")
     print("Players will not see the opponent's moves until they hit a non-empty tile.")
     print("If you hit a non-empty tile, it becomes permanently blocked, and the turn switches to the other player.")
     print("After hitting a non-empty tile, all previous moves are revealed on the board.")
@@ -23,7 +23,8 @@ def instructions(player1: str, player2: str) -> None:
     print(f"Player 1 is {player1} and Player 2 is {player2}.")
     print("After three moves have been made, the previous moves will be revealed (unless a reveal has already occurred).")
     print("The first player to get three in a row wins!")
-    print("If the board is full and no player has three in a row, it's a draw.")
+    print("If the board is full and no player has three in a row, any blocked tiles will be cleared, hidden board will be reset and the game will continue.")
+    print("If the board is full without any blocked tiles and no player has three in a row, it's a draw.")
     print("Let's start the game!")
 
 
@@ -217,7 +218,7 @@ def game(player1: str, player2: str, board_size: int, empty_tile: str, blocked_t
     performed_moves = 0  # Initialize move count
     
     while not game_over:
-        if performed_moves >= 3 and not any(blocked_tile in row for row in board_with_hidden_moves):
+        if performed_moves == 3 and not any(blocked_tile in row for row in board_with_hidden_moves):
             board_with_hidden_moves  = deepcopy(board_with_all_moves) # Moves will be revealed after a delay to reduce the first player's advantage
 
         print_board(board_with_hidden_moves)  # Not showing the moves of the other player
@@ -253,9 +254,21 @@ def game(player1: str, player2: str, board_size: int, empty_tile: str, blocked_t
             game_over = True
         # Check for a draw
         elif is_board_full(board_with_all_moves, empty_tile):
-            print_board(board_with_all_moves)
-            print("It's a draw!")
-            game_over = True
+            # Check if there are blocked tiles on the board
+            if any(blocked_tile in row for row in board_with_all_moves):
+                print("The board is full, but there are blocked tiles. Clearing blocked tiles and continuing the game.")
+                # Clear all blocked tiles to empty
+                for i in range(board_size):
+                    for j in range(board_size):
+                        if board_with_all_moves[i][j] == blocked_tile:
+                            board_with_all_moves[i][j] = empty_tile
+                board_with_hidden_moves = create_board(board_size, empty_tile) ### Reset the hidden moves board0
+                current_player = player1 if current_player == player2 else player2
+                continue  # Continue to the next iteration with the other player
+            else:
+                print_board(board_with_all_moves)
+                print("It's a draw!")
+                game_over = True
         # Switch players
         else:
             current_player = player1 if current_player == player2 else player2
