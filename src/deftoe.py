@@ -21,6 +21,7 @@ def instructions(player1: str, player2: str) -> None:
     print(f"Players take turns placing {player1} and {player2}.")
     print("To place your mark, enter the column letter and row number (e.g., 'B2', 'A3') within the board range.")
     print(f"Player 1 is {player1} and Player 2 is {player2}.")
+    print("After three moves have been made, the previous moves will be revealed (unless a reveal has already occurred).")
     print("The first player to get three in a row wins!")
     print("If the board is full and no player has three in a row, it's a draw.")
     print("Let's start the game!")
@@ -216,13 +217,13 @@ def game(player1: str, player2: str, board_size: int, empty_tile: str, blocked_t
     performed_moves = 0  # Initialize move count
     
     while not game_over:
-        if performed_moves == 3:
+        if performed_moves >= 3 and not any(blocked_tile in row for row in board_with_hidden_moves):
             board_with_hidden_moves  = deepcopy(board_with_all_moves) # Moves will be revealed after a delay to reduce the first player's advantage
 
         print_board(board_with_hidden_moves)  # Not showing the moves of the other player
         print("Already perforemed moves on board:", performed_moves)
-        if performed_moves < 3:
-            print("After three moves have been made, the previous moves will be revealed.")
+        if performed_moves < 3 and not any(blocked_tile in row for row in board_with_hidden_moves):
+            print("After three moves have been made, the previous moves will be revealed (unless a reveal has already occurred).")
         print(f"Player {current_player}'s turn.")
         
         # Get a valid move from the player
