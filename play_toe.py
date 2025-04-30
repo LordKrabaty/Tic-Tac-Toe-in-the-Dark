@@ -13,13 +13,17 @@ player1_wins = 0
 player2_wins = 0
 draws = 0
 
-# Instructions (assuming this function prints game instructions)    
+# Instructions  
 deftoe.instructions(player1, player2)
+
+# who starts first
+first_player_symbol = player1
+second_player_symbol = player2
 
 # Main game loop
 while True:
     # Play the game and get the result
-    result = deftoe.game(player1, player2, board_size, empty_tile)
+    result = deftoe.game(first_player_symbol, second_player_symbol, board_size, empty_tile)
     
     # Update counters based on the game result
     if result == player1:
@@ -39,5 +43,8 @@ while True:
     if play_again != "yes":
         print("Thanks for playing!")
         break
+    # switching players
+    first_player_symbol = player2 if first_player_symbol == player1 else player1
+    second_player_symbol = player1 if first_player_symbol == player2 else player2
 
 

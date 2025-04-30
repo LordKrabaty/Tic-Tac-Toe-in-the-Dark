@@ -191,7 +191,7 @@ def get_valid_move(board: list, empty_tile: str) -> tuple:
             print("Invalid input! Please enter a valid move within the specified range.")
 
 
-def game(player1: str, player2: str, board_size: int, empty_tile: str, blocked_tile: str = '⬛') -> None:
+def game(first_player_symbol: str, second_player_symbol: str, board_size: int, empty_tile: str, blocked_tile: str = '⬛') -> str:
     """
     Main function to run the Tic Tac Toe game.
     
@@ -199,17 +199,19 @@ def game(player1: str, player2: str, board_size: int, empty_tile: str, blocked_t
     the game loop, including win/draw detection and prompting for a replay.
     
     Args:
-        player1 (str): Symbol for player 1.
-        player2 (str): Symbol for player 2.
+        first_player_symbol (str): Symbol for the first player who starts the game.
+        second_player_symbol  (str): Symbol for the second player who goes after first player.
         board_size (int): The size of the board (number of rows and columns).
         empty_tile (str): The symbol representing an empty tile.
         blocked_tile (str): The symbol representing a blocked tile.
+    Returns:
+        str: symbol of winning player or "draw"
     """
     # Initialize an empty game board
     from copy import deepcopy
     board_with_all_moves = create_board(board_size, empty_tile)  # Board for showing all moves
     board_with_hidden_moves = deepcopy(board_with_all_moves)  # Board for hiding completed moves
-    current_player = player1
+    current_player = first_player_symbol
     game_over = False
 
     input("Press Enter to start the game...")  # Wait for user input to start the game
@@ -239,7 +241,7 @@ def game(player1: str, player2: str, board_size: int, empty_tile: str, blocked_t
             board_with_hidden_moves = deepcopy(board_with_all_moves) # Users can see previous moves
             print(f"Hit a non-empty tile ({non_empty_tile})  It is now permanently blocked. Previous moves can be seen on board. Switching turns.")
             # Switch players immediately
-            current_player = player1 if current_player == player2 else player2
+            current_player = first_player_symbol if current_player == second_player_symbol else second_player_symbol
             continue  # Continue to the next iteration with the other player
         else:
             # Perform the move
@@ -264,7 +266,7 @@ def game(player1: str, player2: str, board_size: int, empty_tile: str, blocked_t
                         if board_with_all_moves[i][j] == blocked_tile:
                             board_with_all_moves[i][j] = empty_tile
                 board_with_hidden_moves = create_board(board_size, empty_tile) ### Reset the hidden moves board
-                current_player = player1 if current_player == player2 else player2
+                current_player = first_player_symbol if current_player == second_player_symbol else second_player_symbol
                 continue  # Continue to the next iteration with the other player
             else:
                 print_board(board_with_all_moves)
@@ -273,5 +275,5 @@ def game(player1: str, player2: str, board_size: int, empty_tile: str, blocked_t
                 return 'draw'  # Return 'draw' if the game is a draw
         # Switch players
         else:
-            current_player = player1 if current_player == player2 else player2
+            current_player = first_player_symbol if current_player == second_player_symbol else second_player_symbol
 
