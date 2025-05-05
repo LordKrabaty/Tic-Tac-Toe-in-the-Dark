@@ -2,25 +2,25 @@ from typing import List
 
 """
 Function module for Tic Tac Toe game.
-This module contains functions to manage the game board, check for wins, and determine if the board is full.
+This module contains functions to manage the game.
 """
 
-def instructions(player1: str, player2: str) -> None:
+def instructions(player1_symbol: str, player2_symbol: str) -> None:
     """
     Displays the game instructions to the players.
     
     Args:
-        player1 (str): Symbol for player 1.
-        player2 (str): Symbol for player 2.
+        player1_symbol (str): Symbol for player 1.
+        player2_symbol (str): Symbol for player 2.
     """
     print("Welcome to Tic Tac Toe!")
     print("This version of Tic Tac Toe includes a unique twist: the board is (partly) hidden during play.")
     print("Players will not see the opponent's moves until they hit a non-empty tile.")
     print("If you hit a non-empty tile, it becomes permanently blocked, and the turn switches to the other player.")
     print("After hitting a non-empty tile, all previous moves are revealed on the board.")
-    print(f"Players take turns placing {player1} and {player2}.")
+    print(f"Players take turns placing {player1_symbol} and {player2_symbol}.")
     print("To place your mark, enter the column letter and row number (e.g., 'B2', 'A3') within the board range.")
-    print(f"Player 1 is {player1} and Player 2 is {player2}.")
+    print(f"Player 1 is {player1_symbol} and Player 2 is {player2_symbol}.")
     print("After three moves have been made, the previous moves will be revealed (unless a reveal has already occurred).")
     print("The first player to get three in a row wins!")
     print("If the board is full and no player has three in a row, any blocked tiles will be cleared, hidden board will be reset and the game will continue.")
@@ -28,21 +28,21 @@ def instructions(player1: str, player2: str) -> None:
     print("Let's start the game!")
 
 
-def create_board(size: int, empty_tile: str) -> List[List[str]]:
+def create_board(board_size: int, empty_tile: str) -> List[List[str]]:
     """
     Creates a Tic Tac Toe board of the specified size filled with empty tiles.
     
     Args:
-        size (int): The size of the board (number of rows and columns).
+        board_size (int): The size of the board (number of rows and columns).
         empty_tile (str): The symbol representing an empty tile.
     
     Returns:
         list: A 2D list representing the board.
     """
     board = []
-    for _ in range(size):
+    for _ in range(board_size):
         # Add a row filled with empty tiles
-        board.append([empty_tile] * size)
+        board.append([empty_tile] * board_size)
     return board
 
 def print_board(board: List[List[str]]) -> None:
@@ -65,13 +65,13 @@ def print_board(board: List[List[str]]) -> None:
         print(row_label + "  " + row_content)  # Add row label to the left
     print()
 
-def check_win(board: List[List[str]], player: str) -> bool:
+def check_win(board: List[List[str]], player_symbol: str) -> bool:
     """
     Checks if the specified player has won the game.
     
     Args:
         board (list): A 2D list representing the Tic Tac Toe board.
-        player (str): The player symbol ('X' or 'O') to check for a win.
+        player_symbol (str): The player symbol to check for a win.
     
     Returns:
         bool: True if the player has won, False otherwise.
@@ -80,7 +80,7 @@ def check_win(board: List[List[str]], player: str) -> bool:
     for row in board:
         row_win = True  # Assume player wins in this row
         for cell in row:
-            if cell != player:
+            if cell != player_symbol:
                 row_win = False  # If any cell is not the player's symbol, no win
                 break
         if row_win:
@@ -91,7 +91,7 @@ def check_win(board: List[List[str]], player: str) -> bool:
     for col in range(board_size):
         col_win = True  # Assume player wins in this column
         for row in range(board_size):
-            if board[row][col] != player:
+            if board[row][col] != player_symbol:
                 col_win = False  # If any cell is not the player's symbol, no win
                 break
         if col_win:
@@ -100,7 +100,7 @@ def check_win(board: List[List[str]], player: str) -> bool:
     # Check the first diagonal (top-left to bottom-right) for a win
     diagonal_win_1 = True  # Assume player wins on this diagonal
     for i in range(board_size):
-        if board[i][i] != player:
+        if board[i][i] != player_symbol:
             diagonal_win_1 = False  # If any cell is not the player's symbol, no win
             break
     if diagonal_win_1:
@@ -109,7 +109,7 @@ def check_win(board: List[List[str]], player: str) -> bool:
     # Check the second diagonal (top-right to bottom-left) for a win
     diagonal_win_2 = True  # Assume player wins on this diagonal
     for i in range(board_size):
-        if board[i][board_size - 1 - i] != player:
+        if board[i][board_size - 1 - i] != player_symbol:
             diagonal_win_2 = False  # If any cell is not the player's symbol, no win
             break
     if diagonal_win_2:
@@ -191,7 +191,7 @@ def get_valid_move(board: list, empty_tile: str) -> tuple:
             print("Invalid input! Please enter a valid move within the specified range.")
 
 
-def game(first_player_symbol: str, second_player_symbol: str, board_size: int, empty_tile: str, blocked_tile: str = '⬛') -> str:
+def game(first_symbol: str, second_symbol: str, board_size: int, empty_tile: str, blocked_tile: str) -> str:
     """
     Main function to run the Tic Tac Toe game.
     
@@ -199,8 +199,8 @@ def game(first_player_symbol: str, second_player_symbol: str, board_size: int, e
     the game loop, including win/draw detection and prompting for a replay.
     
     Args:
-        first_player_symbol (str): Symbol for the first player who starts the game.
-        second_player_symbol  (str): Symbol for the second player who goes after first player.
+        first_symbol (str): Symbol for a player who starts the game.
+        second_symbol  (str): Symbol for a player who goes next.
         board_size (int): The size of the board (number of rows and columns).
         empty_tile (str): The symbol representing an empty tile.
         blocked_tile (str): The symbol representing a blocked tile.
@@ -211,7 +211,7 @@ def game(first_player_symbol: str, second_player_symbol: str, board_size: int, e
     from copy import deepcopy
     board_with_all_moves = create_board(board_size, empty_tile)  # Board for showing all moves
     board_with_hidden_moves = deepcopy(board_with_all_moves)  # Board for hiding completed moves
-    current_player = first_player_symbol
+    current_player_symbol = first_symbol
     game_over = False
 
     input("Press Enter to start the game...")  # Wait for user input to start the game
@@ -227,7 +227,7 @@ def game(first_player_symbol: str, second_player_symbol: str, board_size: int, e
         print("Already perforemed moves on board:", performed_moves)
         if performed_moves < 3 and not any(blocked_tile in row for row in board_with_hidden_moves):
             print("After three moves have been made, the previous moves will be revealed (unless a reveal has already occurred).")
-        print(f"Player {current_player}'s turn.")
+        print(f"Player {current_player_symbol}'s turn.")
         
         # Get a valid move from the player
         row, col = get_valid_move(board_with_hidden_moves, empty_tile)
@@ -241,20 +241,20 @@ def game(first_player_symbol: str, second_player_symbol: str, board_size: int, e
             board_with_hidden_moves = deepcopy(board_with_all_moves) # Users can see previous moves
             print(f"Hit a non-empty tile ({non_empty_tile})  It is now permanently blocked. Previous moves can be seen on board. Switching turns.")
             # Switch players immediately
-            current_player = first_player_symbol if current_player == second_player_symbol else second_player_symbol
+            current_player_symbol = first_symbol if current_player_symbol == second_symbol else second_symbol
             continue  # Continue to the next iteration with the other player
         else:
             # Perform the move
-            board_with_all_moves[row][col] = current_player
+            board_with_all_moves[row][col] = current_player_symbol
             performed_moves += 1
             clear_screen()  # Clear the console for not showing the moves of the other player
         
         # Check for a win
-        if check_win(board_with_all_moves, current_player):
+        if check_win(board_with_all_moves, current_player_symbol):
             print_board(board_with_all_moves)
-            print(f"Player {current_player} wins!")
+            print(f"Player {current_player_symbol} wins!")
             game_over = True
-            return current_player  # Return the winning player
+            return current_player_symbol  # Return the winning player
         # Check for a draw
         elif is_board_full(board_with_all_moves, empty_tile):
             # Check if there are blocked tiles on the board
@@ -266,7 +266,7 @@ def game(first_player_symbol: str, second_player_symbol: str, board_size: int, e
                         if board_with_all_moves[i][j] == blocked_tile:
                             board_with_all_moves[i][j] = empty_tile
                 board_with_hidden_moves = create_board(board_size, empty_tile) ### Reset the hidden moves board
-                current_player = first_player_symbol if current_player == second_player_symbol else second_player_symbol
+                current_player_symbol = first_symbol if current_player_symbol == second_symbol else second_symbol
                 continue  # Continue to the next iteration with the other player
             else:
                 print_board(board_with_all_moves)
@@ -275,5 +275,5 @@ def game(first_player_symbol: str, second_player_symbol: str, board_size: int, e
                 return 'draw'  # Return 'draw' if the game is a draw
         # Switch players
         else:
-            current_player = first_player_symbol if current_player == second_player_symbol else second_player_symbol
+            current_player_symbol = first_symbol if current_player_symbol == second_symbol else second_symbol
 

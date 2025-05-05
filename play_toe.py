@@ -3,10 +3,12 @@ from src import deftoe
 # game variables
 
 # Define symbols for players and empty tile
-player1 = '✖️ '  # Player 1 symbol
-player2 = '⭕'   # Player 2 symbol
-empty_tile = '⬜' # Empty tile symbol
+player1_symbol = '✖️ '  # Player 1 symbol
+player2_symbol = '⭕'   # Player 2 symbol
+empty_tile = '⬜' # Empty or hidden tile symbol
+blocked_tile = '⬛' # Blocked tile symbol
 board_size = 3   # Board size, 3 means 3x3
+
 
 # Initialize win counters
 player1_wins = 0
@@ -14,21 +16,21 @@ player2_wins = 0
 draws = 0
 
 # Instructions  
-deftoe.instructions(player1, player2)
+deftoe.instructions(player1_symbol, player2_symbol)
 
 # who starts first
-first_player_symbol = player1
-second_player_symbol = player2
+first_symbol = player1_symbol # Player 1 starts first
+second_symbol = player2_symbol
 
 # Main game loop
 while True:
     # Play the game and get the result
-    result = deftoe.game(first_player_symbol, second_player_symbol, board_size, empty_tile)
+    result = deftoe.game(first_symbol, second_symbol, board_size, empty_tile, blocked_tile)
     
     # Update counters based on the game result
-    if result == player1:
+    if result == player1_symbol:
         player1_wins += 1
-    elif result == player2:
+    elif result == player2_symbol:
         player2_wins += 1
     elif result == "draw":
         draws += 1
@@ -44,7 +46,7 @@ while True:
         print("Thanks for playing!")
         break
     # switching players
-    first_player_symbol = player2 if first_player_symbol == player1 else player1
-    second_player_symbol = player1 if first_player_symbol == player2 else player2
+    first_symbol = player2_symbol if first_symbol == player1_symbol else player1_symbol
+    second_symbol = player1_symbol if first_symbol == player2_symbol else player2_symbol
 
 
