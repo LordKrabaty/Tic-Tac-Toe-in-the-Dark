@@ -240,9 +240,6 @@ def game(first_symbol: str, second_symbol: str, board_size: int, empty_tile: str
             performed_moves += 1
             board_with_hidden_moves = deepcopy(board_with_all_moves) # Users can see previous moves
             print(f"Hit a non-empty tile ({non_empty_tile})  It is now permanently blocked. Previous moves can be seen on board. Switching turns.")
-            # Switch players immediately
-            current_player_symbol = first_symbol if current_player_symbol == second_symbol else second_symbol
-            continue  # Continue to the next iteration with the other player
         else:
             # Perform the move
             board_with_all_moves[row][col] = current_player_symbol
@@ -256,7 +253,7 @@ def game(first_symbol: str, second_symbol: str, board_size: int, empty_tile: str
             game_over = True
             return current_player_symbol  # Return the winning player
         # Check for a draw
-        elif is_board_full(board_with_all_moves, empty_tile):
+        if is_board_full(board_with_all_moves, empty_tile):
             # Check if there are blocked tiles on the board
             if any(blocked_tile in row for row in board_with_all_moves):
                 print("The board is full, but there are blocked tiles. Clearing blocked tiles and continuing the game.")
@@ -266,14 +263,11 @@ def game(first_symbol: str, second_symbol: str, board_size: int, empty_tile: str
                         if board_with_all_moves[i][j] == blocked_tile:
                             board_with_all_moves[i][j] = empty_tile
                 board_with_hidden_moves = create_board(board_size, empty_tile) ### Reset the hidden moves board
-                current_player_symbol = first_symbol if current_player_symbol == second_symbol else second_symbol
-                continue  # Continue to the next iteration with the other player
             else:
                 print_board(board_with_all_moves)
                 print("It's a draw!")
                 game_over = True
                 return 'draw'  # Return 'draw' if the game is a draw
         # Switch players
-        else:
-            current_player_symbol = first_symbol if current_player_symbol == second_symbol else second_symbol
+        current_player_symbol = first_symbol if current_player_symbol == second_symbol else second_symbol
 
