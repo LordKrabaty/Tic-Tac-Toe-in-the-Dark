@@ -45,25 +45,30 @@ def create_board(board_size: int, empty_tile: str) -> List[List[str]]:
         board.append([empty_tile] * board_size)
     return board
 
-def print_board(board: List[List[str]]) -> None:
+def format_board(board: List[List[str]]) -> str:
     """
-    Prints the current state of the board with column labels (A, B, C) and row numbers (1, 2, 3).
+    Formats the current state of the board with column labels (A, B, C) and row numbers (1, 2, 3).
+    Returns the formatted board as a string.
     
     Args:
         board (list): The 2D list representing the board.
+    
+    Returns:
+        str: A string representation of the formatted board.
     """
     size = len(board)
 
-    # Print column labels at the top
+    # Create column labels at the top
     column_labels = "    " + "  ".join(chr(65 + col) for col in range(size))
-    print(column_labels)
+    formatted_board = column_labels + "\n"
 
-    # Print each row with its corresponding number label
+    # Add each row with its corresponding number label
     for i, row in enumerate(board):
         row_label = str(i + 1)  # Convert row index to a number (1, 2, 3)
         row_content = " ".join(row)  # Join cells in the row with spaces
-        print(row_label + "  " + row_content)  # Add row label to the left
-    print()
+        formatted_board += row_label + "  " + row_content + "\n"  # Add row label to the left
+
+    return formatted_board
 
 def check_win(board: List[List[str]], player_symbol: str) -> bool:
     """
@@ -223,7 +228,7 @@ def game(first_symbol: str, second_symbol: str, board_size: int, empty_tile: str
         if performed_moves == 3 and not any(blocked_tile in row for row in board_with_hidden_moves):
             board_with_hidden_moves  = deepcopy(board_with_all_moves) # Moves will be revealed after a delay to reduce the first player's advantage
 
-        print_board(board_with_hidden_moves)  # Not showing the moves of the other player
+        print(format_board(board_with_hidden_moves))  # Not showing the moves of the other player
         print("Already perforemed moves on board:", performed_moves)
         if performed_moves < 3 and not any(blocked_tile in row for row in board_with_hidden_moves):
             print("After three moves have been made, the previous moves will be revealed (unless a reveal has already occurred).")
@@ -248,7 +253,7 @@ def game(first_symbol: str, second_symbol: str, board_size: int, empty_tile: str
         
         # Check for a win
         if check_win(board_with_all_moves, current_player_symbol):
-            print_board(board_with_all_moves)
+            print(format_board(board_with_all_moves)) # Show the final board with all moves
             print(f"Player {current_player_symbol} wins!")
             game_over = True
             return current_player_symbol  # Return the winning player
@@ -264,7 +269,7 @@ def game(first_symbol: str, second_symbol: str, board_size: int, empty_tile: str
                             board_with_all_moves[i][j] = empty_tile
                 board_with_hidden_moves = create_board(board_size, empty_tile) ### Reset the hidden moves board
             else:
-                print_board(board_with_all_moves)
+                print(format_board(board_with_all_moves)) # Show the final board with all moves
                 print("It's a draw!")
                 game_over = True
                 return 'draw'  # Return 'draw' if the game is a draw
