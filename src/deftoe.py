@@ -46,29 +46,29 @@ def create_board(board_size: int, empty_tile: str) -> List[List[str]]:
     return board
 
 def format_board(board: List[List[str]]) -> str:
-    """
-    Formats the current state of the board with column labels (A, B, C) and row numbers (1, 2, 3).
-    Returns the formatted board as a string.
-    
-    Args:
-        board (list): The 2D list representing the board.
-    
-    Returns:
-        str: A string representation of the formatted board.
-    """
-    size = len(board)
+        """
+        Formats the current state of the board with column labels (A, B, C) and row numbers (1, 2, 3).
+        Returns the formatted board as a string.
+        
+        Args:
+            board (list): The 2D list representing the board.
+        
+        Returns:
+            str: A string representation of the formatted board.
+        """
+        size = len(board)
 
-    # Create column labels at the top
-    column_labels = "    " + "  ".join(chr(65 + col) for col in range(size))
-    formatted_board = column_labels + "\n"
+        # Create column labels at the top
+        column_labels = "    " + "  ".join(chr(65 + col) for col in range(size))
+        formatted_board = column_labels + "\n"
 
-    # Add each row with its corresponding number label
-    for i, row in enumerate(board):
-        row_label = str(i + 1)  # Convert row index to a number (1, 2, 3)
-        row_content = " ".join(row)  # Join cells in the row with spaces
-        formatted_board += row_label + "  " + row_content + "\n"  # Add row label to the left
+        # Add each row with its corresponding number label
+        for i, row in enumerate(board):
+            row_label = str(i + 1)  # Convert row index to a number (1, 2, 3)
+            row_content = " ".join(row)  # Join cells in the row with spaces
+            formatted_board += row_label + "  " + row_content + "\n"  # Add row label to the left
 
-    return formatted_board
+        return formatted_board
 
 def check_win(board: List[List[str]], player_symbol: str) -> bool:
     """
@@ -151,49 +151,80 @@ def clear_screen():
     else:
         os.system('clear')
 
+
+def parse_move(move: str) -> tuple:
+    """
+    Parses the user's input move into row and column indices.
+
+    Args:
+        move (str): The user's input move (e.g., 'B2', 'A10').
+
+    Returns:
+        tuple: A tuple containing the column letter and row number as strings.
+    """
+    col_letter = move[0]
+    row_number = move[1:]
+    return col_letter, row_number
+
+def is_move_within_range_to_empty_tile(board: list, row: int, col: int, empty_tile: str) -> bool:
+    """
+    Checks if the given move within the board range and if the tile is empty.
+
+    Args:
+        board (list): A 2D list representing the Tic Tac Toe board.
+        row (int): The row index of the move (0-based).
+        col (int): The column index of the move (0-based).
+        empty_tile (str): The symbol representing a blocked tile.
+
+    Returns:
+        bool: True if the move is valid, False otherwise.
+    """
+    board_size = len(board)
+    if 0 <= row < board_size and 0 <= col < board_size:
+        return board[row][col] == empty_tile
+    return False
+
+
 def get_valid_move(board: list, empty_tile: str) -> tuple:
     """
     Prompts the user to enter a valid move using a single input combining
     column letter and row number (e.g., 'B2', 'A10'), with dynamic range display.
-    
+
     Args:
         board (list): A 2D list representing the Tic Tac Toe board.
         empty_tile (str): The symbol representing a blocked tile.
-    
+
     Returns:
         tuple: A tuple containing the valid row and column indices (0-based).
     """
-    # Calculate board size from the board list
     board_size = len(board)
     valid_move = False
+
     while not valid_move:
         try:
             # Calculate the range of column letters and row numbers
             col_max = chr(65 + board_size - 1)
             row_max = board_size
             
-            # Prompt user for move in the format 'B2', 'A10', etc., with range
+            # Prompt user for move in the format 'B2', 'A10', etc.
             move = input(f"Enter your move (between A1-{col_max}{row_max}): ").strip().upper()
             
-            # Extract column letter and row number from input
-            col_letter = move[0]
-            row = int(move[1:]) - 1  # Convert row to 0-based index
+            # Parse the move
+            col_letter, row_number = parse_move(move)
             
-            # Convert column letter to 0-based index
-            col = ord(col_letter) - 65
+            # Convert inputs to indices
+            row = int(row_number) - 1  # Convert row to 0-based index
+            col = ord(col_letter) - 65  # Convert column letter to 0-based index
             
-            # Validate move
-            if 0 <= row < board_size and 0 <= col < board_size:
-                # Check if the tile is not blocked
-                if board[row][col] == empty_tile:
-                    valid_move = True
-                    return row, col
-                else:
-                    print("Tile is blocked! Please try again.")
+            # Validate the move
+            if is_move_within_range_to_empty_tile(board, row, col, empty_tile):
+                valid_move = True
+                return row, col
             else:
                 print("Invalid move! Please try again.")
         except (IndexError, ValueError):
-            print("Invalid input! Please enter a valid move within the specified range.")
+            print("Invalid input! Please enter a proper input combining column letter and row number (e.g., 'B2')")
+
 
 
 def game(first_symbol: str, second_symbol: str, board_size: int, empty_tile: str, blocked_tile: str) -> str:
