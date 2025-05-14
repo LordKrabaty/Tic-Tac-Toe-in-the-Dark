@@ -151,7 +151,6 @@ def clear_screen():
     else:
         os.system('clear')
 
-
 def parse_move(move: str) -> tuple:
     """
     Parses the user's input move into row and column indices.
@@ -166,7 +165,7 @@ def parse_move(move: str) -> tuple:
     row_number = move[1:]
     return col_letter, row_number
 
-def is_move_within_range_to_empty_tile(board: list, row: int, col: int, empty_tile: str) -> bool:
+def is_move_to_empty_tile(board: list, row: int, col: int, empty_tile: str) -> bool:
     """
     Checks if the given move within the board range and if the tile is empty.
 
@@ -183,7 +182,6 @@ def is_move_within_range_to_empty_tile(board: list, row: int, col: int, empty_ti
     if 0 <= row < board_size and 0 <= col < board_size:
         return board[row][col] == empty_tile
     return False
-
 
 def get_valid_move(board: list, empty_tile: str) -> tuple:
     """
@@ -217,7 +215,7 @@ def get_valid_move(board: list, empty_tile: str) -> tuple:
             col = ord(col_letter) - 65  # Convert column letter to 0-based index
             
             # Validate the move
-            if is_move_within_range_to_empty_tile(board, row, col, empty_tile):
+            if is_move_to_empty_tile(board, row, col, empty_tile):
                 valid_move = True
                 return row, col
             else:
@@ -225,6 +223,27 @@ def get_valid_move(board: list, empty_tile: str) -> tuple:
         except (IndexError, ValueError):
             print("Invalid input! Please enter a proper input combining column letter and row number (e.g., 'B2')")
 
+def clear_blocked_tiles(board: List[List[str]], blocked_tile: str, empty_tile: str):
+    """Clear blocked tiles on the board."""
+    for i in range(len(board)):
+        for j in range(len(board[i])):
+            if board[i][j] == blocked_tile:
+                board[i][j] = empty_tile
+
+def check_game_status(board: List[List[str]], current_player_symbol: str, empty_tile: str, blocked_tile: str) -> str:
+    """Check if the game is won, drawn, or should continue."""
+    if check_win(board, current_player_symbol):
+        print(f"Player {current_player_symbol} wins!")
+        return current_player_symbol
+    if is_board_full(board, empty_tile):
+        if any(blocked_tile in row for row in board):
+            print("Clearing blocked tiles and continuing the game.")
+            clear_blocked_tiles(board, blocked_tile, empty_tile)
+            return "continue"
+        else:
+            print("It's a draw!")
+            return "draw"
+    return "continue"
 
 
 def game(first_symbol: str, second_symbol: str, board_size: int, empty_tile: str, blocked_tile: str) -> str:
@@ -282,28 +301,12 @@ def game(first_symbol: str, second_symbol: str, board_size: int, empty_tile: str
             performed_moves += 1
             clear_screen()  # Clear the console for not showing the moves of the other player
         
-        # Check for a win
-        if check_win(board_with_all_moves, current_player_symbol):
-            print(format_board(board_with_all_moves)) # Show the final board with all moves
-            print(f"Player {current_player_symbol} wins!")
-            game_over = True
-            return current_player_symbol  # Return the winning player
-        # Check for a draw
-        if is_board_full(board_with_all_moves, empty_tile):
-            # Check if there are blocked tiles on the board
-            if any(blocked_tile in row for row in board_with_all_moves):
-                print("The board is full, but there are blocked tiles. Clearing blocked tiles and continuing the game.")
-                # Clear all blocked tiles to empty
-                for i in range(board_size):
-                    for j in range(board_size):
-                        if board_with_all_moves[i][j] == blocked_tile:
-                            board_with_all_moves[i][j] = empty_tile
-                board_with_hidden_moves = create_board(board_size, empty_tile) ### Reset the hidden moves board
-            else:
-                print(format_board(board_with_all_moves)) # Show the final board with all moves
-                print("It's a draw!")
-                game_over = True
-                return 'draw'  # Return 'draw' if the game is a draw
+        # Check game status
+        status = check_game_status(board_with_all_moves, current_player_symbol, empty_tile, blocked_tile)
+        if status in [first_symbol, second_symbol, "draw"]:
+            print(format_board(board_with_all_moves))
+            return status
+        
         # Switch players
         current_player_symbol = first_symbol if current_player_symbol == second_symbol else second_symbol
 
