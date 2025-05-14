@@ -45,8 +45,8 @@ while True:
     if play_again != "yes":
         print("Thanks for playing!")
         break
-    # switching players
-    first_symbol = player2_symbol if first_symbol == player1_symbol else player1_symbol
-    second_symbol = player1_symbol if first_symbol == player2_symbol else player2_symbol
+    # switching who starts first
+    first_symbol = deftoe.switch_player(first_symbol, player1_symbol, player2_symbol)
+    second_symbol = deftoe.switch_player(second_symbol, player1_symbol, player2_symbol)
 
 

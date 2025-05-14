@@ -245,6 +245,41 @@ def check_game_status(board: List[List[str]], current_player_symbol: str, empty_
             return "draw"
     return "continue"
 
+def switch_player(current_player: str, first_symbol: str, second_symbol: str) -> str:
+    """Switch to the other player."""
+    return first_symbol if current_player == second_symbol else second_symbol
+
+def process_move(row, col, board_with_all_moves, board_with_hidden_moves, current_player_symbol, empty_tile, blocked_tile):
+    """
+    Process a move on the board. If the selected tile is not empty, block it.
+    Otherwise, place the current player's symbol.
+
+    Args:
+        row (int): The row index of the move.
+        col (int): The column index of the move.
+        board_with_all_moves (list of list of str): The board showing all moves.
+        board_with_hidden_moves (list of list of str): The board with hidden moves.
+        current_player_symbol (str): The symbol of the current player.
+        empty_tile (str): The symbol representing an empty tile.
+        blocked_tile (str): The symbol representing a blocked tile.
+
+    Returns:
+        tuple: A tuple containing the updated boards and the increment in performed moves.
+    """
+    from copy import deepcopy
+
+    if board_with_all_moves[row][col] != empty_tile:
+        # Tile is not empty, block it
+        non_empty_tile = board_with_all_moves[row][col]
+        board_with_all_moves[row][col] = blocked_tile
+        board_with_hidden_moves = deepcopy(board_with_all_moves)  # Update hidden board to reveal moves
+        print(f"Hit a non-empty tile ({non_empty_tile}). It is now permanently blocked. Previous moves can be seen on board. Switching turns.")
+        return board_with_all_moves, board_with_hidden_moves, 1
+    else:
+        # Perform the move
+        board_with_all_moves[row][col] = current_player_symbol
+        clear_screen()  # Clear the console for not showing the moves of the other player
+        return board_with_all_moves, board_with_hidden_moves, 1
 
 def game(first_symbol: str, second_symbol: str, board_size: int, empty_tile: str, blocked_tile: str) -> str:
     """
@@ -280,6 +315,7 @@ def game(first_symbol: str, second_symbol: str, board_size: int, empty_tile: str
 
         print(format_board(board_with_hidden_moves))  # Not showing the moves of the other player
         print("Already perforemed moves on board:", performed_moves)
+
         if performed_moves < 3 and not any(blocked_tile in row for row in board_with_hidden_moves):
             print("After three moves have been made, the previous moves will be revealed (unless a reveal has already occurred).")
         print(f"Player {current_player_symbol}'s turn.")
@@ -287,19 +323,10 @@ def game(first_symbol: str, second_symbol: str, board_size: int, empty_tile: str
         # Get a valid move from the player
         row, col = get_valid_move(board_with_hidden_moves, empty_tile)
         
-        # Check if the selected tile is not empty
-        if board_with_all_moves[row][col] != empty_tile:
-            # Change the tile back to empty on both boards
-            non_empty_tile = board_with_all_moves[row][col]
-            board_with_all_moves[row][col] = blocked_tile   # tile is blocked now
-            performed_moves += 1
-            board_with_hidden_moves = deepcopy(board_with_all_moves) # Users can see previous moves
-            print(f"Hit a non-empty tile ({non_empty_tile})  It is now permanently blocked. Previous moves can be seen on board. Switching turns.")
-        else:
-            # Perform the move
-            board_with_all_moves[row][col] = current_player_symbol
-            performed_moves += 1
-            clear_screen()  # Clear the console for not showing the moves of the other player
+        # Process the move
+        board_with_all_moves, board_with_hidden_moves, move_increment = process_move(
+            row, col, board_with_all_moves, board_with_hidden_moves, current_player_symbol, empty_tile, blocked_tile)
+        performed_moves += move_increment
         
         # Check game status
         status = check_game_status(board_with_all_moves, current_player_symbol, empty_tile, blocked_tile)
@@ -308,5 +335,5 @@ def game(first_symbol: str, second_symbol: str, board_size: int, empty_tile: str
             return status
         
         # Switch players
-        current_player_symbol = first_symbol if current_player_symbol == second_symbol else second_symbol
+        current_player_symbol = switch_player(current_player_symbol, first_symbol, second_symbol)
 
