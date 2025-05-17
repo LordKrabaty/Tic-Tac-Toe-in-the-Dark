@@ -1,6 +1,13 @@
 """Module for testing functions."""
 
 from src import deftoe
+import sys
+import os
+from unittest.mock import patch
+
+# Add the src directory to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+
 
 def test_create_board():
     """
@@ -226,9 +233,6 @@ def test_clear_screen():
     Test the `clear_screen` function from the `deftoe` module.
     Ensures the correct system command is executed based on the operating system.
     """
-    import os
-    import platform
-    from unittest.mock import patch
 
     # Mock the os.system call to verify the correct command is used
     with patch("os.system") as mock_system:
@@ -346,9 +350,41 @@ def test_valid_move_input():
         row, col = deftoe.get_valid_move(board, empty_tile)
         assert (row, col) == (2, 2)  # C3 corresponds to (2, 2)
 
-def test_clear_blocked_tiles():
+def test_process_validated_move():
     """
-    Test the `clear_blocked_tiles` function to ensure it correctly replaces
+    Test the `process_validated_move` function to ensure it correctly handles moves and blocking on the board.
+    """
+
+    # Initial setup for the tests
+    empty_tile = "⬜"
+    blocked_tile = "⬛"
+    current_player_symbol = "O"
+    board_with_all_moves = [
+        ["O", "⬜", "X"],
+        ["⬜", "O", "⬜"],
+        ["⬜", "O", "X"]
+    ]
+    board_with_hidden_moves = [
+        ["⬜", "⬜", "⬜"],
+        ["⬜", "⬜", "⬜"],
+        ["⬜", "⬜", "⬜"]
+    ]
+
+    # Scenario 1: Place a move on an empty tile
+    updated_board, updated_hidden_board, increment = deftoe.process_validated_move(0, 1, board_with_all_moves, board_with_hidden_moves, current_player_symbol, empty_tile, blocked_tile)
+    assert updated_board[0][1] == "O"  # The move should place 'O' on the board
+    assert updated_hidden_board == board_with_hidden_moves  # Hidden board should remain unchanged
+    assert increment == 1  # Move should increment the move count by 1
+
+    # Scenario 2: Block a non-empty tile
+    updated_board, updated_hidden_board, increment = deftoe.process_validated_move(0, 0, board_with_all_moves, board_with_hidden_moves, current_player_symbol, empty_tile, blocked_tile)
+    assert updated_board[0][0] == "⬛"  # The non-empty tile should be blocked
+    assert updated_hidden_board[0][0] == "⬛"  # Hidden board should reveal the blocked tile
+    assert increment == 1  # Blocking should also increment the move count by 1
+
+def test_clear_tiles():
+    """
+    Test the `clear_tiles` function to ensure it correctly replaces
     all occurrences of the blocked tile with the empty tile on the board.
     Scenarios include a board with no blocked tiles, a board with some blocked tiles,
     and a board with all blocked tiles.
@@ -367,7 +403,7 @@ def test_clear_blocked_tiles():
         ["⬜", "⬜", "⬜"],
         ["⬜", "⬜", "⬜"]
     ]
-    deftoe.clear_blocked_tiles(board_no_blocked, blocked_tile, empty_tile)
+    deftoe.clear_tiles(board_no_blocked, blocked_tile, empty_tile)
     assert board_no_blocked == expected_no_blocked  # No change expected
 
     # Scenario 2: Board with some blocked tiles
@@ -381,7 +417,7 @@ def test_clear_blocked_tiles():
         ["⬜", "⬜", "⬜"],
         ["⬜", "⬜", "⬜"]
     ]
-    deftoe.clear_blocked_tiles(board_some_blocked, blocked_tile, empty_tile)
+    deftoe.clear_tiles(board_some_blocked, blocked_tile, empty_tile)
     assert board_some_blocked == expected_some_blocked  # Blocked tiles replaced
 
     # Scenario 3: Board with all blocked tiles
@@ -395,9 +431,10 @@ def test_clear_blocked_tiles():
         ["⬜", "⬜", "⬜"],
         ["⬜", "⬜", "⬜"]
     ]
-    deftoe.clear_blocked_tiles(board_all_blocked, blocked_tile, empty_tile)
+    deftoe.clear_tiles(board_all_blocked, blocked_tile, empty_tile)
     assert board_all_blocked == expected_all_blocked  # All tiles replaced
 
+# update this tesing
 def test_check_game_status():
     """
     Test the `check_game_status` function to ensure it correctly identifies
@@ -427,7 +464,7 @@ def test_check_game_status():
         ["⬜", "⬜", "⬜"],
         ["⬜", "⬜", "⬜"]
     ]
-    assert deftoe.check_game_status(winning_board, current_player_symbol, empty_tile, blocked_tile) == "X"  # Player X wins
+    assert deftoe.check_game_status(winning_board, winning_board, current_player_symbol, empty_tile, blocked_tile) == "X"  # Player X wins
 
     # Scenario 2: Full board with draw
     full_draw_board = [
@@ -435,7 +472,7 @@ def test_check_game_status():
         ["X", "X", "O"],
         ["O", "X", "O"]
     ]
-    assert deftoe.check_game_status(full_draw_board, current_player_symbol, empty_tile, blocked_tile) == "draw"  # It's a draw
+    assert deftoe.check_game_status(full_draw_board, full_draw_board, current_player_symbol, empty_tile, blocked_tile) == "draw"  # It's a draw
 
     # Scenario 3: Full board with blocked tiles
     full_blocked_board = [
@@ -443,7 +480,7 @@ def test_check_game_status():
         ["⬛", "X", "O"],
         ["O", "X", "⬛"]
     ]
-    assert deftoe.check_game_status(full_blocked_board, current_player_symbol, empty_tile, blocked_tile) == "continue"  # Clear blocked tiles and continue
+    assert deftoe.check_game_status(full_blocked_board, full_blocked_board, current_player_symbol, empty_tile, blocked_tile) == "continue"  # Clear blocked tiles and continue
 
     # Scenario 4: Board that should continue
     ongoing_board = [
@@ -451,7 +488,149 @@ def test_check_game_status():
         ["X", "⬜", "O"],
         ["O", "X", "⬜"]
     ]
-    assert deftoe.check_game_status(ongoing_board, current_player_symbol, empty_tile, blocked_tile) == "continue"  # Game should continue
+    assert deftoe.check_game_status(ongoing_board, ongoing_board, current_player_symbol, empty_tile, blocked_tile) == "continue"  # Game should continue
+
+def test_switch_player():
+    """
+    Test the `switch_player` function to ensure it correctly switches between two players.
+    """
+
+    # Scenario 1: Switch from first player to second player
+    assert deftoe.switch_player("X", "X", "O") == "O"  # Current player is "X", should switch to "O"
+    assert deftoe.switch_player("O", "O", "X") == "X"  # Current player is "O", should switch to "X"
+
+    # Scenario 2: Switch from second player to first player
+    assert deftoe.switch_player("O", "X", "O") == "X"  # Current player is "O", should switch to "X"
+    assert deftoe.switch_player("X", "O", "X") == "O"  # Current player is "X", should switch to "O"
+
+    # Scenario 3: Ensure consistency with repeated switches
+    current_player = "X"
+    for _ in range(10):
+        current_player = deftoe.switch_player(current_player, "X", "O")
+    assert current_player == "X"  # After 10 switches, should return to original player "X"
+
+def test_game_invalidMove_firstPlayerWin():
+    """
+    Test the `game` function for a scenario where the first player wins.
+
+    The test simulates a full game where both players make valid moves, and the first
+    player achieves a winning line without hitting non-empty tiles, making wrong moves,
+    or requiring the board to be full.
+    """
+    first_symbol = "X"
+    second_symbol = "O"
+    board_size = 3
+    empty_tile = "⬜"
+    blocked_tile = "⬛"
+
+    # Define a sequence of moves in the user input format (e.g., 'A1', 'B2')
+    # These moves lead to a win for the first player without one invalid move.
+    moves = [
+        "",     # Simulate hitting Enter at the start
+        "A1",   # 1. X
+        "B1",   # 2. O
+        "1A",   # invalid move
+        "A2",   # 3. X
+        "B2",   # 4. O
+        "A3"    # 5. X (winning move - vertical line in column A)
+    ]
+
+    # Mock the input function to return moves in sequence
+    with patch('builtins.input', side_effect=moves), \
+         patch('deftoe.clear_screen'), \
+         patch('deftoe.format_board', return_value="formatted_board"):
+
+        # Run the game function
+        result = deftoe.game(first_symbol, second_symbol, board_size, empty_tile, blocked_tile)
+
+        # Assert that the game ends with the first player winning
+        assert result == first_symbol, "The game should have ended with the first player winning."
+
+def test_game_invalidMoves_draw():
+    """
+    Test the `game` function for a wrong move and a scenario where the game ends in a draw.
+    """
+    first_symbol = "X"
+    second_symbol = "O"
+    board_size = 3
+    empty_tile = "⬜"
+    blocked_tile = "⬛"
+
+    # Define a sequence of moves in the user input format (e.g., 'A1', 'B2')
+    # These moves lead to a draw. The first input simulates hitting Enter. There are also 3 invalid moves during game.
+    moves = [
+        "",     # Simulate hitting Enter at the start
+        "y",   # inalid move
+        "",    # inalid move
+        "A1",  #1 X
+        "C1",  #2 O
+        "B1",  #3 X
+        "B1",  # O inalid move (move aleady showed on the board)
+        "A2",  #4 O
+        "C2",  #5 X
+        "B2",  #6 O
+        "A3",  #7 X
+        "C3",  #8 O
+        "B3"   #9 X
+    ]
+
+    # Mock the input function to return moves in sequence
+    with patch('builtins.input', side_effect=moves), \
+         patch('deftoe.clear_screen'), \
+         patch('deftoe.format_board', return_value="formatted_board"):
+
+        # Run the game function
+        result = deftoe.game(first_symbol, second_symbol, board_size, empty_tile, blocked_tile)
+
+        # Assert that the game ends in a draw
+        assert result == "draw", "The game should have ended in a draw."
+
+def test_game_blockingTiles_unblockTiles_secondPlayerWin():
+    """
+    Test the `game` function for a wrong move, hitting non-empty tiles, unblocking non-empty tiles and winning.
+    """
+    first_symbol = "X"
+    second_symbol = "O"
+    board_size = 3
+    empty_tile = "⬜"
+    blocked_tile = "⬛"
+
+    # Define a sequence of moves in the user input format (e.g., 'A1', 'B2')
+    # These moves lead to a win of the second player. 
+    # Before win there is some hitting of non empty tiles and unblocking of non empty tiles after the board is full.
+    # The first input simulates hitting Enter.
+    moves = [
+        "",     # Simulate hitting Enter at the start
+        "A1",  #1 X
+        "C1",  #2 O
+        "B1",  #3 X
+        "A2",  #4 O
+        "C2",  #5 X
+        "B2",  #6 O
+        "A3",  #7 X
+        "C2",  #8 O, non-empty tile, blocking
+        "B3",  #9 X
+        "C3",  #10 O, board is full, Clearing blocked tiles and continuing the game.
+        "A1",  #11 X, another non-empty tile, blocking
+        "C2",  #12 O, winning move
+    ]
+
+    # Mock the input function to return moves in sequence
+    with patch('builtins.input', side_effect=moves), \
+         patch('deftoe.clear_screen'), \
+         patch('deftoe.format_board', return_value="formatted_board"):
+
+        # Run the game function
+        result = deftoe.game(first_symbol, second_symbol, board_size, empty_tile, blocked_tile)
+
+        # Assert that the game ends in a draw
+        assert result == second_symbol, "The game should have ended in winning move of second player."
+
+
+
+
+
+
 
 
 

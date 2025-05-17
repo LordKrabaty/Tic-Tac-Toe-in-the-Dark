@@ -27,7 +27,6 @@ def instructions(player1_symbol: str, player2_symbol: str) -> None:
     print("If the board is full without any blocked tiles and no player has three in a row, it's a draw.")
     print("Let's start the game!")
 
-
 def create_board(board_size: int, empty_tile: str) -> List[List[str]]:
     """
     Creates a Tic Tac Toe board of the specified size filled with empty tiles.
@@ -222,36 +221,12 @@ def get_valid_move(board: list, empty_tile: str) -> tuple:
                 print("Invalid move! Please try again.")
         except (IndexError, ValueError):
             print("Invalid input! Please enter a proper input combining column letter and row number (e.g., 'B2')")
+    # This line should never be reached, but ensures a tuple is always returned
+    return 0, 0
 
-def clear_blocked_tiles(board: List[List[str]], blocked_tile: str, empty_tile: str):
-    """Clear blocked tiles on the board."""
-    for i in range(len(board)):
-        for j in range(len(board[i])):
-            if board[i][j] == blocked_tile:
-                board[i][j] = empty_tile
-
-def check_game_status(board: List[List[str]], current_player_symbol: str, empty_tile: str, blocked_tile: str) -> str:
-    """Check if the game is won, drawn, or should continue."""
-    if check_win(board, current_player_symbol):
-        print(f"Player {current_player_symbol} wins!")
-        return current_player_symbol
-    if is_board_full(board, empty_tile):
-        if any(blocked_tile in row for row in board):
-            print("Clearing blocked tiles and continuing the game.")
-            clear_blocked_tiles(board, blocked_tile, empty_tile)
-            return "continue"
-        else:
-            print("It's a draw!")
-            return "draw"
-    return "continue"
-
-def switch_player(current_player: str, first_symbol: str, second_symbol: str) -> str:
-    """Switch to the other player."""
-    return first_symbol if current_player == second_symbol else second_symbol
-
-def process_move(row, col, board_with_all_moves, board_with_hidden_moves, current_player_symbol, empty_tile, blocked_tile):
+def process_validated_move(row, col, board_with_all_moves, board_with_hidden_moves, current_player_symbol, empty_tile, blocked_tile):
     """
-    Process a move on the board. If the selected tile is not empty, block it.
+    Process an already validated move on the board. If the selected tile is not empty, block it.
     Otherwise, place the current player's symbol.
 
     Args:
@@ -281,6 +256,72 @@ def process_move(row, col, board_with_all_moves, board_with_hidden_moves, curren
         clear_screen()  # Clear the console for not showing the moves of the other player
         return board_with_all_moves, board_with_hidden_moves, 1
 
+def clear_tiles(board: List[List[str]], blocked_tile: str, empty_tile: str, clear_all: bool = False):
+    """
+    Clear tiles on the board.
+    
+    If `clear_all` is True, all tiles on the board will be replaced with `empty_tile`.
+    Otherwise, only tiles matching `blocked_tile` will be replaced.
+    
+    Args:
+        board (List[List[str]]): The game board.
+        blocked_tile (str): The tile to be cleared (if `clear_all` is False).
+        empty_tile (str): The tile to replace cleared tiles with.
+        clear_all (bool): Whether to clear all tiles or just blocked tiles.
+    """
+    for i in range(len(board)):
+        for j in range(len(board[i])):
+            if clear_all or board[i][j] == blocked_tile:
+                # Replace the tile with the empty tile
+                board[i][j] = empty_tile
+
+def check_game_status(board_with_all_moves: List[List[str]], 
+                      board_hidden_moves: List[List[str]], 
+                      current_player_symbol: str, 
+                      empty_tile: str, 
+                      blocked_tile: str) -> str:
+    """
+    Checks the current status of the game to determine if a player has won, 
+    the game is a draw, or it should continue.
+
+    Args:
+        board_with_all_moves (List[List[str]]): The main game board showing all moves.
+        board_hidden_moves (List[List[str]]): The hidden board used for additional game logic.
+        current_player_symbol (str): The symbol of the current player (e.g., 'X' or 'O').
+        empty_tile (str): The symbol representing an empty tile on the board.
+        blocked_tile (str): The symbol representing a blocked tile on the board.
+
+    Returns:
+        str: The status of the game:
+             - If a player wins, returns the player's symbol (e.g., 'X' or 'O').
+             - If the game is a draw, returns "draw".
+             - If the game should continue, returns "continue".
+    """
+    # Check if the current player has won
+    if check_win(board_with_all_moves, current_player_symbol):
+        print(f"Player {current_player_symbol} wins!")
+        return current_player_symbol
+    
+    # Check if the board is full
+    if is_board_full(board_with_all_moves, empty_tile):
+        # If blocked tiles exist, clear them and continue the game
+        if any(blocked_tile in row for row in board_with_all_moves):
+            print("Clearing blocked tiles and continuing the game.")
+            clear_tiles(board_with_all_moves, blocked_tile, empty_tile)  # Unblock the tiles
+            clear_tiles(board_hidden_moves, blocked_tile, empty_tile, clear_all=True)  # Hide all moves
+            return "continue"
+        else:
+            # If no blocked tiles and the board is full, it's a draw
+            print("It's a draw!")
+            return "draw"
+    
+    # If no win or draw condition is met, the game continues
+    return "continue"
+
+def switch_player(current_player: str, first_symbol: str, second_symbol: str) -> str:
+    """Switch to the other player."""
+    return first_symbol if current_player == second_symbol else second_symbol
+
 def game(first_symbol: str, second_symbol: str, board_size: int, empty_tile: str, blocked_tile: str) -> str:
     """
     Main function to run the Tic Tac Toe game.
@@ -297,7 +338,7 @@ def game(first_symbol: str, second_symbol: str, board_size: int, empty_tile: str
     Returns:
         str: symbol of winning player or "draw"
     """
-    # Initialize an empty game board
+    # Initialize an empty and a hidden game boards
     from copy import deepcopy
     board_with_all_moves = create_board(board_size, empty_tile)  # Board for showing all moves
     board_with_hidden_moves = deepcopy(board_with_all_moves)  # Board for hiding completed moves
@@ -324,16 +365,20 @@ def game(first_symbol: str, second_symbol: str, board_size: int, empty_tile: str
         row, col = get_valid_move(board_with_hidden_moves, empty_tile)
         
         # Process the move
-        board_with_all_moves, board_with_hidden_moves, move_increment = process_move(
+        board_with_all_moves, board_with_hidden_moves, move_increment = process_validated_move(
             row, col, board_with_all_moves, board_with_hidden_moves, current_player_symbol, empty_tile, blocked_tile)
         performed_moves += move_increment
         
         # Check game status
-        status = check_game_status(board_with_all_moves, current_player_symbol, empty_tile, blocked_tile)
+        status = check_game_status(board_with_all_moves, board_with_hidden_moves, current_player_symbol, empty_tile, blocked_tile)
         if status in [first_symbol, second_symbol, "draw"]:
             print(format_board(board_with_all_moves))
             return status
-        
+    
         # Switch players
         current_player_symbol = switch_player(current_player_symbol, first_symbol, second_symbol)
+    
+    # In case the loop exits unexpectedly, return "draw" as a fallback¨
+    print("Game ended unexpectedly. No winner. It's a draw.")
+    return "draw"
 
