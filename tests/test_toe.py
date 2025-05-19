@@ -434,7 +434,6 @@ def test_clear_tiles():
     deftoe.clear_tiles(board_all_blocked, blocked_tile, empty_tile)
     assert board_all_blocked == expected_all_blocked  # All tiles replaced
 
-# update this tesing
 def test_check_game_status():
     """
     Test the `check_game_status` function to ensure it correctly identifies
@@ -458,13 +457,20 @@ def test_check_game_status():
     empty_tile = "⬜"
     blocked_tile = "⬛"
 
+    board_hidden_moves = [
+        ["X", "⬜", "⬜"],
+        ["⬜", "⬜", "⬜"],
+        ["O", "X", "⬜"]
+    ]
+
+
     # Scenario 1: Winning board
     winning_board = [
         ["X", "X", "X"],
         ["⬜", "⬜", "⬜"],
-        ["⬜", "⬜", "⬜"]
+        ["O", "X", "⬜"]
     ]
-    assert deftoe.check_game_status(winning_board, winning_board, current_player_symbol, empty_tile, blocked_tile) == "X"  # Player X wins
+    assert deftoe.check_game_status(winning_board, board_hidden_moves, current_player_symbol, empty_tile, blocked_tile) == "X"  # Player X wins
 
     # Scenario 2: Full board with draw
     full_draw_board = [
@@ -472,7 +478,7 @@ def test_check_game_status():
         ["X", "X", "O"],
         ["O", "X", "O"]
     ]
-    assert deftoe.check_game_status(full_draw_board, full_draw_board, current_player_symbol, empty_tile, blocked_tile) == "draw"  # It's a draw
+    assert deftoe.check_game_status(full_draw_board, board_hidden_moves, current_player_symbol, empty_tile, blocked_tile) == "draw"  # It's a draw
 
     # Scenario 3: Full board with blocked tiles
     full_blocked_board = [
@@ -480,7 +486,22 @@ def test_check_game_status():
         ["⬛", "X", "O"],
         ["O", "X", "⬛"]
     ]
-    assert deftoe.check_game_status(full_blocked_board, full_blocked_board, current_player_symbol, empty_tile, blocked_tile) == "continue"  # Clear blocked tiles and continue
+
+    ublocked_board = [
+        ["X", "O", "X"],
+        ["⬜", "X", "O"],
+        ["O", "X", "⬜"]
+    ]
+
+    reset_board = [
+        ["⬜", "⬜", "⬜"],
+        ["⬜", "⬜", "⬜"],
+        ["⬜", "⬜", "⬜"]
+    ]
+
+    assert deftoe.check_game_status(full_blocked_board, board_hidden_moves, current_player_symbol, empty_tile, blocked_tile) == "continue"  # Clear blocked tiles and continue
+    assert full_blocked_board == ublocked_board
+    assert board_hidden_moves == reset_board
 
     # Scenario 4: Board that should continue
     ongoing_board = [
@@ -488,7 +509,7 @@ def test_check_game_status():
         ["X", "⬜", "O"],
         ["O", "X", "⬜"]
     ]
-    assert deftoe.check_game_status(ongoing_board, ongoing_board, current_player_symbol, empty_tile, blocked_tile) == "continue"  # Game should continue
+    assert deftoe.check_game_status(ongoing_board, board_hidden_moves, current_player_symbol, empty_tile, blocked_tile) == "continue"  # Game should continue
 
 def test_switch_player():
     """
@@ -524,7 +545,7 @@ def test_game_invalidMove_firstPlayerWin():
     blocked_tile = "⬛"
 
     # Define a sequence of moves in the user input format (e.g., 'A1', 'B2')
-    # These moves lead to a win for the first player without one invalid move.
+    # These moves lead to a win for the first player with one invalid move.
     moves = [
         "",     # Simulate hitting Enter at the start
         "A1",   # 1. X
