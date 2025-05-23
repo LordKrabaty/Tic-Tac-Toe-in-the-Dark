@@ -1,25 +1,29 @@
+"""
+Main module for running the Tic Tac Toe game.
+This module initializes the game, manages player turns, and tracks scores across multiple games.
+"""
+
 from src import deftoe
 
-# game variables
+# Game variables
 
-# Define symbols for players and empty tile
+# Define symbols for players and tiles
 player1_symbol = '✖️ '  # Player 1 symbol
 player2_symbol = '⭕'   # Player 2 symbol
-empty_tile = '⬜' # Empty or hidden tile symbol
-blocked_tile = '⬛' # Blocked tile symbol
-board_size = 3   # Board size, 3 means 3x3
-
+empty_tile = '⬜'       # Empty or hidden tile symbol
+blocked_tile = '⬛'     # Blocked tile symbol
+board_size = 3         # Board size, e.g., 3 means 3x3
 
 # Initialize win counters
 player1_wins = 0
 player2_wins = 0
 draws = 0
 
-# Instructions  
+# Display instructions to players
 deftoe.instructions(player1_symbol, player2_symbol)
 
-# who starts first
-first_symbol = player1_symbol # Player 1 starts first
+# Set the starting player
+first_symbol = player1_symbol  # Player 1 starts first
 second_symbol = player2_symbol
 
 # Main game loop
@@ -38,15 +42,23 @@ while True:
         print("Unexpected result:", result)
     
     # Print the current score
-    print(f"Score - Player 1: {player1_wins}, Player 2: {player2_wins}, Draws: {draws}")
+    print(f"\nCurrent Score:")
+    print(f"Player 1 ({player1_symbol}): {player1_wins}")
+    print(f"Player 2 ({player2_symbol}): {player2_wins}")
+    print(f"Draws: {draws}\n")
     
-    # Ask to play again
-    play_again = input("Do you want to play again? (yes/no): ").lower()
-    if play_again != "yes":
-        print("Thanks for playing!")
+    # Ask players if they want to play again
+    play_again = input("Do you want to play again? (yes/no): ").strip().lower()
+    if play_again not in ["yes", "y"]:
+        print("Thanks for playing! Final Score:")
+        print(f"Player 1 ({player1_symbol}): {player1_wins}")
+        print(f"Player 2 ({player2_symbol}): {player2_wins}")
+        print(f"Draws: {draws}")
         break
-    # switching who starts first
+
+    # Switch who starts first for the next game
     first_symbol = deftoe.switch_player(first_symbol, player1_symbol, player2_symbol)
     second_symbol = deftoe.switch_player(second_symbol, player1_symbol, player2_symbol)
+
 
 
