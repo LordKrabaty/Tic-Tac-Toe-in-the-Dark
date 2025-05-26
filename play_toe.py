@@ -26,10 +26,21 @@ deftoe.instructions(player1_symbol, player2_symbol)
 first_symbol = player1_symbol  # Player 1 starts first
 second_symbol = player2_symbol
 
+# Ask for game mode
+print("Welcome to Tic-Tac-Toe in the Dark!")
+print("Choose game mode:")
+print("1 - Two players")
+print("2 - Play against computer")
+mode = input("Enter 1 or 2: ").strip()
+
 # Main game loop
 while True:
-    # Play the game and get the result
-    result = deftoe.game(first_symbol, second_symbol, board_size, empty_tile, blocked_tile)
+    if mode == "2":
+        # Player vs Computer
+        result = deftoe.game_vs_computer(player1_symbol, player2_symbol, board_size, empty_tile, blocked_tile)
+    else:
+        # Two players
+        result = deftoe.game(first_symbol, second_symbol, board_size, empty_tile, blocked_tile)
     
     # Update counters based on the game result
     if result == player1_symbol:
@@ -57,6 +68,7 @@ while True:
         break
 
     # Switch who starts first for the next game
+
     first_symbol = deftoe.switch_player(first_symbol, player1_symbol, player2_symbol)
     second_symbol = deftoe.switch_player(second_symbol, player1_symbol, player2_symbol)
 

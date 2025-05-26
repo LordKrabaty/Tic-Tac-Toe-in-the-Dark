@@ -208,3 +208,26 @@ def test_game_flow():
          patch('deftoe.format_board', return_value="formatted_board"):
         result = deftoe.game(first_symbol, second_symbol, board_size, empty_tile, blocked_tile)
         assert result == first_symbol
+
+
+def test_game_vs_computer():
+    """
+    Test the `game_vs_computer` function for a complete game simulation against a random computer.
+    """
+    player_symbol = "X"
+    computer_symbol = "O"
+    board_size = 3
+    empty_tile = "⬜"
+    blocked_tile = "⬛"
+
+    # Simulate player moves and let computer pick randomly
+    # The first input is for "Press Enter to start the game against the computer..."
+    moves = ["", "A1", "A2", "A3", "B1", "B2", "B3", "C1", "C2", "C3", 
+                 "A1", "A2", "A3", "B1", "B2", "B3", "C1", "C2", "C3", 
+                 "A1", "A2", "A3", "B1", "B2", "B3", "C1", "C2", "C3" ]  # 3 times all files, to be sure, it will be at least a draw
+
+    with patch('builtins.input', side_effect=moves), \
+         patch('deftoe.clear_screen'), \
+         patch('deftoe.format_board', return_value="formatted_board"):
+        result = deftoe.game_vs_computer(player_symbol, computer_symbol, board_size, empty_tile, blocked_tile)
+        assert result in [player_symbol, computer_symbol, "draw"]
