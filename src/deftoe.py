@@ -339,7 +339,7 @@ def game(first_symbol: str, second_symbol: str, board_size: int, empty_tile: str
     return "draw"
 
 
-def game_vs_computer(player_symbol: str, computer_symbol: str, board_size: int, empty_tile: str, blocked_tile: str) -> str:
+def game_vs_random_computer(player_symbol: str, computer_symbol: str, board_size: int, empty_tile: str, blocked_tile: str) -> str:
     """
     Variant of the game where the player plays against a random-move computer.
 
@@ -384,6 +384,90 @@ def game_vs_computer(player_symbol: str, computer_symbol: str, board_size: int, 
                 if board_with_hidden_moves[i][j] == empty_tile
             ]
             row, col = random.choice(empty_positions)
+
+        board_with_all_moves, board_with_hidden_moves, move_increment = process_validated_move(
+            row, col, board_with_all_moves, board_with_hidden_moves, current_player_symbol, empty_tile, blocked_tile
+        )
+        performed_moves += move_increment
+
+        status = check_game_status(board_with_all_moves, board_with_hidden_moves, current_player_symbol, empty_tile, blocked_tile)
+        if status in [player_symbol, computer_symbol, "draw"]:
+            print(format_board(board_with_all_moves))
+            return status
+
+        current_player_symbol = switch_player(current_player_symbol, player_symbol, computer_symbol)
+
+    print("Game ended unexpectedly. No winner. It's a draw.")
+    return "draw"
+
+
+def game_vs_smart_computer(player_symbol: str, computer_symbol: str, board_size: int, empty_tile: str, blocked_tile: str) -> str:
+    """
+    Variant of the game where the player plays against a smarter computer.
+    The computer will try to win if possible, block the player if needed, otherwise pick randomly.
+
+    Args:
+        player_symbol (str): Symbol for the human player.
+        computer_symbol (str): Symbol for the computer.
+        board_size (int): The size of the board (number of rows and columns).
+        empty_tile (str): The symbol representing an empty tile.
+        blocked_tile (str): The symbol representing a blocked tile.
+
+    Returns:
+        str: Symbol of the winning player or "draw".
+    """
+    def find_winning_move(board, symbol):
+        # Try all empty positions, return the first that leads to a win
+        for i in range(board_size):
+            for j in range(board_size):
+                if board[i][j] == empty_tile:
+                    board[i][j] = symbol
+                    if check_win(board, symbol):
+                        board[i][j] = empty_tile
+                        return (i, j)
+                    board[i][j] = empty_tile
+        return None
+
+    board_with_all_moves = create_board(board_size, empty_tile)
+    board_with_hidden_moves = deepcopy(board_with_all_moves)
+    current_player_symbol = player_symbol
+    game_over = False
+    performed_moves = 0
+
+    input("Press Enter to start the game against the smart computer...")
+    clear_screen()
+
+    while not game_over:
+        if performed_moves == 3 and not any(blocked_tile in row for row in board_with_hidden_moves):
+            board_with_hidden_moves = deepcopy(board_with_all_moves)
+
+        print(format_board(board_with_hidden_moves))
+        print(f"Performed moves: {performed_moves}")
+        if performed_moves < 3:
+            print("After three moves have been made, the previous moves will be revealed.")
+
+        print(f"Player {current_player_symbol}'s turn.")
+
+        if current_player_symbol == player_symbol:
+            row, col = get_valid_move(board_with_hidden_moves, empty_tile)
+        else:
+            # Smart computer logic
+            # 1. Win if possible
+            move = find_winning_move(board_with_all_moves, computer_symbol)
+            # 2. Block player if possible
+            if move is None:
+                move = find_winning_move(board_with_all_moves, player_symbol)
+            # 3. Otherwise, pick random
+            if move is None:
+                empty_positions = [
+                    (i, j)
+                    for i in range(board_size)
+                    for j in range(board_size)
+                    if board_with_hidden_moves[i][j] == empty_tile
+                ]
+                move = random.choice(empty_positions)
+            row, col = move
+            print(f"Computer chooses: {chr(65 + col)}{row + 1}")
 
         board_with_all_moves, board_with_hidden_moves, move_increment = process_validated_move(
             row, col, board_with_all_moves, board_with_hidden_moves, current_player_symbol, empty_tile, blocked_tile

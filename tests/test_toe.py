@@ -222,12 +222,78 @@ def test_game_vs_computer():
 
     # Simulate player moves and let computer pick randomly
     # The first input is for "Press Enter to start the game against the computer..."
-    moves = ["", "A1", "A2", "A3", "B1", "B2", "B3", "C1", "C2", "C3", 
-                 "A1", "A2", "A3", "B1", "B2", "B3", "C1", "C2", "C3", 
-                 "A1", "A2", "A3", "B1", "B2", "B3", "C1", "C2", "C3" ]  # 3 times all files, to be sure, it will be at least a draw
+    moves = ["", "A1", "A2", "A3", "B1", "B2", "B3", "C1", "C2", "C3"] * 6   # 6 times all files, to be sure, it will be at least a draw
 
     with patch('builtins.input', side_effect=moves), \
          patch('deftoe.clear_screen'), \
          patch('deftoe.format_board', return_value="formatted_board"):
-        result = deftoe.game_vs_computer(player_symbol, computer_symbol, board_size, empty_tile, blocked_tile)
+        result = deftoe.game_vs_random_computer(player_symbol, computer_symbol, board_size, empty_tile, blocked_tile)
+        assert result in [player_symbol, computer_symbol, "draw"]
+
+def test_find_winning_move():
+    """
+    Test the internal `find_winning_move` logic from game_vs_smart_computer.
+    """
+    # We'll define a minimal version of find_winning_move here for testing.
+    def find_winning_move(board, symbol, empty_tile="⬜"):
+        size = len(board)
+        for i in range(size):
+            for j in range(size):
+                if board[i][j] == empty_tile:
+                    board[i][j] = symbol
+                    win = deftoe.check_win(board, symbol)
+                    board[i][j] = empty_tile
+                    if win:
+                        return (i, j)
+        return None
+
+    # Test horizontal win
+    board = [
+        ["X", "X", "⬜"],
+        ["⬜", "⬜", "⬜"],
+        ["⬜", "⬜", "⬜"]
+    ]
+    assert find_winning_move(board, "X") == (0, 2)
+
+    # Test vertical win
+    board = [
+        ["O", "⬜", "⬜"],
+        ["O", "⬜", "⬜"],
+        ["⬜", "⬜", "⬜"]
+    ]
+    assert find_winning_move(board, "O") == (2, 0)
+
+    # Test diagonal win
+    board = [
+        ["X", "⬜", "⬜"],
+        ["⬜", "X", "⬜"],
+        ["⬜", "⬜", "⬜"]
+    ]
+    assert find_winning_move(board, "X") == (2, 2)
+
+    # Test no win possible
+    board = [
+        ["X", "O", "X"],
+        ["O", "X", "O"],
+        ["O", "X", "O"]
+    ]
+    assert find_winning_move(board, "X") is None
+
+def test_game_vs_smart_computer():
+    """
+    Test the `game_vs_smart_computer` function for a complete game simulation against a smart computer.
+    """
+    player_symbol = "X"
+    computer_symbol = "O"
+    board_size = 3
+    empty_tile = "⬜"
+    blocked_tile = "⬛"
+
+    # Simulate player moves; computer will play smart
+    moves = ["", "A1", "B1", "A2", "B2", "A3", "B3", "C1", "C2", "C3"] * 3  # Enough moves for a full game
+
+    with patch('builtins.input', side_effect=moves), \
+         patch('deftoe.clear_screen'), \
+         patch('deftoe.format_board', return_value="formatted_board"):
+        result = deftoe.game_vs_smart_computer(player_symbol, computer_symbol, board_size, empty_tile, blocked_tile)
         assert result in [player_symbol, computer_symbol, "draw"]

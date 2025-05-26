@@ -30,14 +30,18 @@ second_symbol = player2_symbol
 print("Welcome to Tic-Tac-Toe in the Dark!")
 print("Choose game mode:")
 print("1 - Two players")
-print("2 - Play against computer")
-mode = input("Enter 1 or 2: ").strip()
+print("2 - Play against computer - easy mode")
+print("3 - Play against computer - medium mode")
+mode = input("Enter 1 or 2 or 3: ").strip()
 
 # Main game loop
 while True:
     if mode == "2":
         # Player vs Computer
-        result = deftoe.game_vs_computer(player1_symbol, player2_symbol, board_size, empty_tile, blocked_tile)
+        result = deftoe.game_vs_random_computer(player1_symbol, player2_symbol, board_size, empty_tile, blocked_tile)
+    elif mode == "3":
+        # Player vs Computer
+        result = deftoe.game_vs_smart_computer(player1_symbol, player2_symbol, board_size, empty_tile, blocked_tile)
     else:
         # Two players
         result = deftoe.game(first_symbol, second_symbol, board_size, empty_tile, blocked_tile)
